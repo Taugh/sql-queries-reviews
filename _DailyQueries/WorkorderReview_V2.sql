@@ -1,69 +1,149 @@
 USE max76PRD
 GO
 
--- Work Order Review Ver. 2 
--- Checks pending review work orders to make sure they have labor and log entries. 
--- The query also checks to make sure that the work orders are not started early or are late.
--- Also verifies that the work orders have not been QA Approved
+/***************************************************************************************************
+Query Name: WO_Review_Flags_PendingReview.sql
+Location / File Path: sql/work_orders/WO_Review_Flags_PendingReview.sql
 
-with notOntime AS (SELECT wonum, siteid, status, worktype, assignedownergroup, owner, targcompdate, fnlconstraint, actfinish, actstart, sneconstraint
-				   FROM workorder
-				   WHERE orgid = 'US' and siteid = 'FWN' and status in ('PENRVW')  -- find all pending review work orders
-				      and woclass in ('WORKORDER','ACTIVITY') and istask = 0 and worktype in ('CA','PM','RM','RQL')
-					  and (actfinish > fnlconstraint or (actstart < sneconstraint and targcompdate > {ts '2024-03-01 00:00:00.000'}))
-					  and NOT EXISTS
-								(SELECT *
-								 FROM worklog
-								 WHERE workorder.siteid = worklog.siteid and workorder.wonum = worklog.recordkey and logtype = 'QA APPROVAL')
-			    ),
+Author: Troy Brannon
+  Date: 2025-09-04
+  Version: 1.0
 
-		noLabor AS (SELECT wonum, siteid, status, worktype, assignedownergroup, owner, targcompdate, fnlconstraint, actfinish
-					FROM workorder AS w
-					WHERE siteid = 'FWN' and status = 'PENRVW'and woclass in ('WORKORDER','ACTIVITY') and historyflag = 0 and istask = 0 and worktype != 'AD'
-						and NOT EXISTS
-								(SELECT *
-								 FROM labtrans AS l
-									INNER JOIN workorder AS w1
-										ON l.siteid = w1.siteid and refwo = w1.wonum
-								 WHERE l.siteid = w.siteid and (refwo = w.wonum or (w1.parent = w.wonum and w1.istask = 1)))
-									and NOT EXISTS
-											(SELECT *
-											 FROM worklog
-											 WHERE w.siteid = worklog.siteid and w.wonum = worklog.recordkey and logtype = 'QA APPROVAL') 
-				),
+Purpose:
+  Identify pending review work orders at site FWN that:
+  - Started early or finished late.
+  - Have no labor transactions.
+  - Have no worklog entries.
+  - Have not received QA Approval.
 
-	noLog AS (SELECT wonum, siteid, status, worktype, assignedownergroup, owner, targcompdate, fnlconstraint, actfinish
-			  FROM workorder AS w
-			  WHERE siteid = 'FWN' and status = 'PENRVW'and woclass in ('WORKORDER','ACTIVITY') and historyflag = 0 and istask = 0 and worktype != 'AD'
-				and NOT EXISTS
-					    (SELECT *
-						 FROM worklog
-						 WHERE siteid = w.siteid and recordkey = w.wonum)
-			  )
+Row Grain:
+  One row per flagged work order (WORKORDER).
 
-SELECT wonum, siteid, status, worktype, assignedownergroup, owner, targcompdate, fnlconstraint, actfinish,
-	CASE 
-		WHEN (actstart < sneconstraint and targcompdate > {ts '2024-03-01 00:00:00.000'}) THEN 'Started Early' 
-		WHEN actfinish > fnlconstraint THEN 'Late'
-		ELSE '' 
-	END AS 'Error'
-FROM notOntime
-UNION
-SELECT wonum, siteid, status, worktype, assignedownergroup, owner, targcompdate, fnlconstraint, actfinish,
-	CASE
-		WHEN wonum > 0 THEN 'No Labor'
-		ELSE ''
-	END AS 'Error'
-FROM noLabor
-UNION
-SELECT wonum, siteid, status, worktype, assignedownergroup, owner, targcompdate, fnlconstraint, actfinish,
-	CASE
-		WHEN wonum > 0 THEN 'No Log'
-		ELSE ''
-	END AS 'Error'
-FROM noLog;
+Assumptions:
+  - Work orders are filtered by status 'PENRVW', site 'FWN', and org 'US'.
+  - QA Approval is tracked via WORKLOG.LOGTYPE = 'QA APPROVAL'.
+  - Labor is tracked via LABTRANS linked to WORKORDER via REFWO or child tasks.
+  - Log presence is determined by existence of WORKLOG entries.
+
+Parameters:
 
 
-SELECT COUNT(wonum)
+Filters:
+  - Work orders must be active (not history), not tasks, and of class WORKORDER or ACTIVITY.
+  - QA Approval required for all flagged conditions.
+
+Security:
+  - Read-only; no sensitive columns.
+
+Version Control:
+  - Store under /sql/work_orders with a paired doc under /docs/work_orders.
+
+Change Log:
+  2025-09-05  TB/M365  Refactor for clarity & performance: modular CTEs, QA filter, UNION ALL,
+                       qualified columns, consistent casing, standardized header.
+***************************************************************************************************/
+
+
+WITH base_workorders AS (
+    SELECT wonum, siteid, status, worktype, assignedownergroup, owner,
+           targcompdate, fnlconstraint, actfinish, actstart, sneconstraint
+    FROM workorder
+    WHERE orgid = 'US'
+      AND siteid = 'FWN'
+      AND status = 'PENRVW'
+      AND woclass IN ('WORKORDER', 'ACTIVITY')
+      AND istask = 0
+      AND worktype IN ('CA', 'PM', 'RM', 'RQL')
+),
+
+qa_missing AS (
+    SELECT recordkey, siteid
+    FROM worklog
+    WHERE logtype = 'QA APPROVAL'
+),
+
+not_ontime AS (
+    SELECT b.*
+    FROM base_workorders b
+    WHERE (b.actfinish > b.fnlconstraint OR 
+          (b.actstart < b.sneconstraint AND b.targcompdate > {ts '2024-03-01 00:00:00.000'}))
+      AND NOT EXISTS (
+          SELECT 1
+          FROM qa_missing q
+          WHERE q.siteid = b.siteid AND q.recordkey = b.wonum
+      )
+),
+
+no_labor AS (
+    SELECT w.wonum, w.siteid, w.status, w.worktype, w.assignedownergroup, w.owner,
+           w.targcompdate, w.fnlconstraint, w.actfinish
+    FROM workorder w
+    WHERE w.siteid = 'FWN'
+      AND w.status = 'PENRVW'
+      AND w.woclass IN ('WORKORDER', 'ACTIVITY')
+      AND w.historyflag = 0
+      AND w.istask = 0
+      AND w.worktype != 'AD'
+      AND NOT EXISTS (
+          SELECT 1
+          FROM labtrans l
+          JOIN workorder w1 ON l.siteid = w1.siteid AND l.refwo = w1.wonum
+          WHERE l.siteid = w.siteid AND (l.refwo = w.wonum OR (w1.parent = w.wonum AND w1.istask = 1))
+      )
+      AND NOT EXISTS (
+          SELECT 1
+          FROM qa_missing q
+          WHERE q.siteid = w.siteid AND q.recordkey = w.wonum
+      )
+),
+
+no_log AS (
+    SELECT w.wonum, w.siteid, w.status, w.worktype, w.assignedownergroup, w.owner,
+           w.targcompdate, w.fnlconstraint, w.actfinish
+    FROM workorder w
+    WHERE w.siteid = 'FWN'
+      AND w.status = 'PENRVW'
+      AND w.woclass IN ('WORKORDER', 'ACTIVITY')
+      AND w.historyflag = 0
+      AND w.istask = 0
+      AND w.worktype != 'AD'
+      AND NOT EXISTS (
+          SELECT 1
+          FROM worklog wl
+          WHERE wl.siteid = w.siteid AND wl.recordkey = w.wonum
+      )
+)
+
+-- Final union of all flagged work orders
+SELECT wonum, siteid, status, worktype, assignedownergroup, owner,
+       targcompdate, fnlconstraint, actfinish,
+       CASE 
+           WHEN actstart < sneconstraint AND targcompdate > {ts '2024-03-01 00:00:00.000'} THEN 'Started Early'
+           WHEN actfinish > fnlconstraint THEN 'Late'
+           ELSE ''
+       END AS Error
+FROM not_ontime
+
+UNION ALL
+
+SELECT wonum, siteid, status, worktype, assignedownergroup, owner,
+       targcompdate, fnlconstraint, actfinish,
+       'No Labor' AS Error
+FROM no_labor
+
+UNION ALL
+
+SELECT wonum, siteid, status, worktype, assignedownergroup, owner,
+       targcompdate, fnlconstraint, actfinish,
+       'No Log' AS Error
+FROM no_log;
+
+
+-- Summary count of all pending review work orders
+SELECT COUNT(wonum) AS total_pending_review
 FROM workorder
-WHERE siteid = 'FWN' and status = 'PENRVW'and woclass in ('WORKORDER','ACTIVITY') and historyflag = 0 and istask = 0 and status = 'PENRVW';
+WHERE siteid = 'FWN'
+  AND status = 'PENRVW'
+  AND woclass IN ('WORKORDER', 'ACTIVITY')
+  AND historyflag = 0
+  AND istask = 0;

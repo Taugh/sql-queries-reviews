@@ -1,7 +1,47 @@
+USE max76PRD
 
--- Retrieve last count date and item details for selected items
--- Filters by site, location, item status, and itemset
--- Converts last count date to yyyy/mm/dd format
+
+/******************************************************************************************
+Query Name       : last_count_by_item.sql
+File Path        : C:\Users\BRANNTR1\OneDrive - Alcon\SQL Server Management Studio\INV Queries.sql
+     Repository  : https://github.com/Taugh/sql-queries-reviews/blob/main/INV%20Queries/last_count_by_item.sql
+Author           : Troy Brannon
+Date Created     : 2025-09-05
+Last Modified    : 2025-09-05
+
+Purpose          : Retrieve last physical count date and item details for selected items.
+                   Filters by site, location, item status, and itemset. Formats count date.
+
+Row Grain        : One row per itemnum per location.
+
+Assumptions      : 
+                   - Only items from itemset 'IUS' are considered.
+                   - Site and location are hardcoded as 'FWN' and 'FWNCS'.
+                   - Status 'OBSOLETE' items are excluded.
+                   - Last count date is sourced from invbalances.physcntdate.
+                   - Item numbers must be manually specified in the IN clause.
+
+Parameters       : 
+                   - None currently parameterized; itemnum list must be manually updated.
+
+Filters          : 
+                   - itemsetid = 'IUS'
+                   - siteid = 'FWN'
+                   - location = 'FWNCS'
+                   - status NOT IN ('OBSOLETE')
+                   - itemnum IN ('') — placeholder to be replaced with actual values.
+
+Security         : No sensitive data exposed. Ensure access to inventory, item, and 
+                   invbalances tables is properly controlled.
+
+Version Control  : Stored in GitHub repository 'sql-queries-reviews'
+                   Branch: main
+                   Last Reviewed: 2025-09-05 by Troy Brannon
+
+Change Log       : 
+                   - 2025-09-05: Initial header added and query reviewed for clarity.
+******************************************************************************************/
+
 
 SELECT
     i.itemnum AS [Item #],

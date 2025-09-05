@@ -1,25 +1,57 @@
 USE max76PRD
 
-/*
-  =============================================
-  Query: New Inventory Items Report
-  Purpose: Identify items created in the last 7 days with vendor and GL account details
-  Author: Troy Brannon
-  Date: 2025-09-04
-  Version: 1.0
-  =============================================
-*/
+/******************************************************************************************
+Query Name       :WescoNewInventory.sql
+File Path        : C:\Users\BRANNTR1\OneDrive - Alcon\SQL Server Management Studio\_WeeklyReports\WescoNewInventory.sql
+     Repository  : https://github.com/Taugh/sql-queries-reviews/blob/main/_WeeklyReports/WescoNewInventory.sql
+Author           : Troy Brannon
+Date             : 2025-09-05
+Version          : 1.0
+
+Purpose          : Identify newly added inventory items within the last 7 days for specific
+                   sites and locations. Filters by active status and audit type 'I'.
+
+Row Grain        : One row per unique itemnum per siteid.
+
+Assumptions      : 
+                   - Only items with status 'ACTIVE' are considered.
+                   - Inventory changes are tracked via invstatus.changedate.
+                   - Audit type 'I' in a_inventory indicates new item creation.
+                   - Site and location filters are predefined via table variables.
+
+Parameters       : 
+                   - @RecentDate: 7-day window from current date.
+                   - @site: Table variable containing site IDs.
+                   - @location: Table variable containing location IDs.
+
+Filters          : 
+                   - itemsetid = 'IUS'
+                   - siteid and location must match provided filters.
+                   - status = 'ACTIVE'
+                   - changedate >= @RecentDate
+                   - eaudittype = 'I'
+
+Security         : No sensitive data exposed. Ensure access to inventory, item, invstatus,
+                   invvendor, chartofaccounts, and a_inventory tables is properly controlled.
+
+Version Control  : Stored in GitHub repository 'sql-queries-reviews'
+                   Branch: main
+                   Last Reviewed: 2025-09-05 by Troy Brannon
+
+Change Log       : 
+                   - 2025-09-05: Initial header added and query reviewed for structure and clarity.
+******************************************************************************************/
 
 -- Declare date variable for 7-day window
 DECLARE @RecentDate DATETIME = DATEADD(DAY, -7, CAST(GETDATE() AS DATE));
 
 -- Define site filter
 DECLARE @site TABLE (siteid VARCHAR(8));
-INSERT INTO @site(siteid) VALUES ('--ASPEX'), ('FWN');
+INSERT INTO @site(siteid) VALUES ('ASPEX'), ('==FWN');
 
 -- Define location filter
 DECLARE @location TABLE (location VARCHAR(8));
-INSERT INTO @location(location) VALUES ('--ASPCS'), ('FWNCS');
+INSERT INTO @location(location) VALUES ('ASPCS'), ('--FWNCS');
 
 -- Query for new inventory items
 SELECT DISTINCT 
