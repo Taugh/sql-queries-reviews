@@ -1,25 +1,65 @@
 USE max76PRD
 GO
 
-SELECT w.assetnum
-	,a.description
-	,SUM(CASE WHEN reportdate >= DATEADD(YEAR, DATEDIFF(YEAR, 0, CURRENT_TIMESTAMP)-3, 0) and reportdate < DATEADD(YEAR, DATEDIFF(YEAR, 0, CURRENT_TIMESTAMP)-2, 0)
-		THEN 1 ELSE 0 END) AS '2022 Work Orders'
-	,SUM(CASE WHEN reportdate >= DATEADD(YEAR, DATEDIFF(YEAR, 0, CURRENT_TIMESTAMP)-3, 0) and reportdate < DATEADD(YEAR, DATEDIFF(YEAR, 0, CURRENT_TIMESTAMP)-2, 0)
-		THEN w.actlabhrs ELSE 0 END) AS '2022 Downtime'
-	,SUM(CASE WHEN reportdate >= DATEADD(YEAR, DATEDIFF(YEAR, 0, CURRENT_TIMESTAMP)-2, 0) and reportdate < DATEADD(YEAR, DATEDIFF(YEAR, 0, CURRENT_TIMESTAMP)-1, 0)
-		THEN 1 ELSE 0 END) AS '2023 Work Orders'
-	,SUM(CASE WHEN reportdate >= DATEADD(YEAR, DATEDIFF(YEAR, 0, CURRENT_TIMESTAMP)-2, 0) and reportdate < DATEADD(YEAR, DATEDIFF(YEAR, 0, CURRENT_TIMESTAMP)-1, 0)
-		THEN w.actlabhrs ELSE 0 END) AS '2023 Downtime'
-	,SUM(CASE WHEN reportdate >= DATEADD(YEAR, DATEDIFF(YEAR, 0, CURRENT_TIMESTAMP)-1, 0) and reportdate < DATEADD(YEAR, DATEDIFF(YEAR, 0, CURRENT_TIMESTAMP)-0, 0)
-		THEN 1 ELSE 0 END) AS '2024 Work Orders'
-	,SUM(CASE WHEN reportdate >= DATEADD(YEAR, DATEDIFF(YEAR, 0, CURRENT_TIMESTAMP)-1, 0) and reportdate < DATEADD(YEAR, DATEDIFF(YEAR, 0, CURRENT_TIMESTAMP)-1, 0)
-		THEN w.actlabhrs ELSE 0 END) AS '2024 Downtime'
+-- Purpose: Summarize unscheduled labor hours and work order counts per asset
+--          for the past 3 years (2022–2024) at site 'FWN' for specific owner groups.
+-- Notes:
+--   - Filters for CM worktype and excludes tasks.
+--   - Groups by asset number and description.
+
+SELECT 
+    w.assetnum, -- Asset identifier
+    a.description, -- Asset description
+    
+    -- 2022
+    SUM(CASE 
+        WHEN reportdate >= DATEADD(YEAR, DATEDIFF(YEAR, 0, CURRENT_TIMESTAMP) - 3, 0) 
+         AND reportdate < DATEADD(YEAR, DATEDIFF(YEAR, 0, CURRENT_TIMESTAMP) - 2, 0)
+        THEN 1 ELSE 0 
+    END) AS [2022 Work Orders],
+    
+    SUM(CASE 
+        WHEN reportdate >= DATEADD(YEAR, DATEDIFF(YEAR, 0, CURRENT_TIMESTAMP) - 3, 0) 
+         AND reportdate < DATEADD(YEAR, DATEDIFF(YEAR, 0, CURRENT_TIMESTAMP) - 2, 0)
+        THEN w.actlabhrs ELSE 0 
+    END) AS [2022 Downtime],
+
+    -- 2023
+    SUM(CASE 
+        WHEN reportdate >= DATEADD(YEAR, DATEDIFF(YEAR, 0, CURRENT_TIMESTAMP) - 2, 0) 
+         AND reportdate < DATEADD(YEAR, DATEDIFF(YEAR, 0, CURRENT_TIMESTAMP) - 1, 0)
+        THEN 1 ELSE 0 
+    END) AS [2023 Work Orders],
+    
+    SUM(CASE 
+        WHEN reportdate >= DATEADD(YEAR, DATEDIFF(YEAR, 0, CURRENT_TIMESTAMP) - 2, 0) 
+         AND reportdate < DATEADD(YEAR, DATEDIFF(YEAR, 0, CURRENT_TIMESTAMP) - 1, 0)
+        THEN w.actlabhrs ELSE 0 
+    END) AS [2023 Downtime],
+
+    -- 2024
+    SUM(CASE 
+        WHEN reportdate >= DATEADD(YEAR, DATEDIFF(YEAR, 0, CURRENT_TIMESTAMP) - 1, 0) 
+         AND reportdate < DATEADD(YEAR, DATEDIFF(YEAR, 0, CURRENT_TIMESTAMP), 0)
+        THEN 1 ELSE 0 
+    END) AS [2024 Work Orders],
+    
+    SUM(CASE 
+        WHEN reportdate >= DATEADD(YEAR, DATEDIFF(YEAR, 0, CURRENT_TIMESTAMP) - 1, 0) 
+         AND reportdate < DATEADD(YEAR, DATEDIFF(YEAR, 0, CURRENT_TIMESTAMP), 0)
+        THEN w.actlabhrs ELSE 0 
+    END) AS [2024 Downtime]
 
 FROM workorder AS w
-	Inner JOIN asset AS a
-ON w.siteid = a.siteid and w.assetnum = a.assetnum
-WHERE woclass in ('WORKORDER','ACTIVITY') and istask = 0 and w.siteid = 'FWN' and worktype = 'CM' 
-	and assignedownergroup IN ('FWNCSM','FWNMET','FWNWSM')
-	and reportdate >= DATEADD(YEAR, DATEDIFF(YEAR,0,CURRENT_TIMESTAMP)-3, 0) and reportdate < DATEADD(YEAR, DATEDIFF(YEAR,0,CURRENT_TIMESTAMP)+0, 0)
-GROUP BY w.assetnum, a.description
+INNER JOIN asset AS a
+    ON w.siteid = a.siteid AND w.assetnum = a.assetnum
+WHERE 
+    w.woclass IN ('WORKORDER', 'ACTIVITY') 
+    AND w.istask = 0 
+    AND w.siteid = 'FWN' 
+    AND w.worktype = 'CM' 
+    AND w.assignedownergroup IN ('FWNCSM', 'FWNMET', 'FWNWSM')
+    AND reportdate >= DATEADD(YEAR, DATEDIFF(YEAR, 0, CURRENT_TIMESTAMP) - 3, 0) 
+    AND reportdate < DATEADD(YEAR, DATEDIFF(YEAR, 0, CURRENT_TIMESTAMP), 0)
+GROUP BY 
+    w.assetnum, a.description

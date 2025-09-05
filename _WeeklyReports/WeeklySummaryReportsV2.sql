@@ -1,46 +1,80 @@
 USE max76PRD
 GO
 
+-- Weekly Work Order Summary Report
+-- Filters by assignedownergroup and categorizes work orders by status and timing
+-- This version is for ProdMaint groups: FWNAE, FWNLC1, FWNLC2, FWNPS
+
 SELECT
-	--ProdMaint
-	SUM(CASE WHEN 
-				(targcompdate <= DATEADD(DAY,DATEDIFF(DAY,0,CURRENT_TIMESTAMP)+7, 0) AND targcompdate > DATEADD(DAY,DATEDIFF(DAY,0,CURRENT_TIMESTAMP)+0, 0) 
-				AND (worktype IN('CA','PM','RM','RQL')) AND status NOT IN('COMP','FLAGGED','MISSED','PENRVW','PENDQA','REVWD') 
-				AND assignedownergroup IN('FWNAE','FWNLC1','FWNLC2','FWNPS')) 
-			THEN 1 ELSE 0 END) AS 'ProdMaint EOW'
-	
-	,SUM(CASE WHEN 
-				(targcompdate = DATEADD(MONTH,DATEDIFF(MONTH,0,CURRENT_TIMESTAMP)+1, 0) AND (worktype IN('CA','PM','RM','RQL')) 
-				AND status NOT IN('COMP','FLAGGED','MISSED','PENRVW','PENDQA','REVWD') AND assignedownergroup IN('FWNAE','FWNLC1','FWNLC2','FWNPS')) 
-			THEN 1 ELSE 0 END) AS 'ProdMaint EOM'
-	
-	,SUM(CASE WHEN 
-				(targcompdate <> fnlconstraint AND targcompdate <= DATEADD(MONTH,DATEDIFF(MONTH,0,CURRENT_TIMESTAMP)+1, 0) 
-				AND (targcompdate <= CURRENT_TIMESTAMP AND (CURRENT_TIMESTAMP >= DATEADD(DAY,DATEDIFF(DAY,0,fnlconstraint)-10, 0)))
-				AND status NOT IN('COMP','CORRTD','MISSED','PENRVW','PENDQA','FLAGGED','REVWD') AND assignedownergroup IN('FWNAE','FWNLC1','FWNLC2','FWNPS'))
-			THEN 1 ELSE 0 END) AS 'ProdMaint Risk Late'
-	
-	,SUM(CASE WHEN (targcompdate <= DATEADD(MONTH, DATEDIFF(MONTH,0,CURRENT_TIMESTAMP)+1, 0) AND ((CURRENT_TIMESTAMP >= (DATEADD(DAY,-10,targcompdate)) 
-				AND pluscfrequency IN('1','7','14') AND pluscfrequnit IN('DAYS','MONTHS')) or ((fnlconstraint < CURRENT_TIMESTAMP) 
-				AND CURRENT_TIMESTAMP > (DATEADD(DAY,8,targcompdate)) AND pluscfrequency between 2 AND 5 AND pluscfrequnit IN('MONTHS')) 
-				or (fnlconstraint <= CURRENT_TIMESTAMP AND CURRENT_TIMESTAMP > (DATEADD(DAY,36,targcompdate)) AND pluscfrequency between 5 AND 11 
-				AND pluscfrequnit IN('MONTHS')or fnlconstraint < CURRENT_TIMESTAMP AND CURRENT_TIMESTAMP > (DATEADD(DAY,50,targcompdate)) 
-				AND pluscfrequency >= 1 AND pluscfrequnit IN('YEARS')))and status NOT IN('COMP','CORRTD','MISSED','PENRVW','PENDQA','FLAGGED','REVWD') 
-				AND assignedownergroup IN('FWNAE','FWNLC1','FWNLC2','FWNPS'))
-			THEN 1 ELSE 0 END) AS 'ProdMaint Risk Missed'
-	
-	,SUM(CASE WHEN 
-				(status IN('FLAGGED')and assignedownergroup IN('FWNAE','FWNLC1','FWNLC2','FWNPS'))
-			THEN 1 ELSE 0 END) AS 'ProdMaint Flagged'
-			
-	,SUM(CASE WHEN 
-				(status IN('MISSED')and assignedownergroup IN('FWNAE','FWNLC1','FWNLC2','FWNPS'))
-			THEN 1 ELSE 0 END) AS 'ProdMaint Missed'
+    -- Work orders due by end of current week
+    SUM(CASE 
+        WHEN targcompdate BETWEEN 
+            DATEADD(DAY, DATEDIFF(DAY, 0, CURRENT_TIMESTAMP), 0) AND 
+            DATEADD(DAY, DATEDIFF(DAY, 0, CURRENT_TIMESTAMP) + 7, 0)
+        AND worktype IN ('CA', 'PM', 'RM', 'RQL')
+        AND status NOT IN ('COMP', 'FLAGGED', 'MISSED', 'PENRVW', 'PENDQA', 'REVWD')
+        AND assignedownergroup IN ('FWNAE', 'FWNLC1', 'FWNLC2', 'FWNPS')
+        THEN 1 ELSE 0 
+    END) AS 'ProdMaint EOW',
+
+    -- Work orders due by end of current month
+    SUM(CASE 
+        WHEN targcompdate = DATEADD(MONTH, DATEDIFF(MONTH, 0, CURRENT_TIMESTAMP) + 1, 0)
+        AND worktype IN ('CA', 'PM', 'RM', 'RQL')
+        AND status NOT IN ('COMP', 'FLAGGED', 'MISSED', 'PENRVW', 'PENDQA', 'REVWD')
+        AND assignedownergroup IN ('FWNAE', 'FWNLC1', 'FWNLC2', 'FWNPS')
+        THEN 1 ELSE 0 
+    END) AS 'ProdMaint EOM',
+
+    -- Work orders at risk of being late
+    SUM(CASE 
+        WHEN targcompdate <> fnlconstraint
+        AND targcompdate <= DATEADD(MONTH, DATEDIFF(MONTH, 0, CURRENT_TIMESTAMP) + 1, 0)
+        AND targcompdate <= CURRENT_TIMESTAMP
+        AND CURRENT_TIMESTAMP >= DATEADD(DAY, DATEDIFF(DAY, 0, fnlconstraint) - 10, 0)
+        AND status NOT IN ('COMP', 'CORRTD', 'MISSED', 'PENRVW', 'PENDQA', 'FLAGGED', 'REVWD')
+        AND assignedownergroup IN ('FWNAE', 'FWNLC1', 'FWNLC2', 'FWNPS')
+        THEN 1 ELSE 0 
+    END) AS 'ProdMaint Risk Late',
+
+    -- Work orders at risk of being missed based on frequency and timing
+    SUM(CASE 
+        WHEN targcompdate <= DATEADD(MONTH, DATEDIFF(MONTH, 0, CURRENT_TIMESTAMP) + 1, 0)
+        AND (
+            (CURRENT_TIMESTAMP >= DATEADD(DAY, -10, targcompdate) 
+                AND pluscfrequency IN ('1', '7', '14') AND pluscfrequnit IN ('DAYS', 'MONTHS'))
+            OR (fnlconstraint < CURRENT_TIMESTAMP 
+                AND CURRENT_TIMESTAMP > DATEADD(DAY, 8, targcompdate) 
+                AND pluscfrequency BETWEEN 2 AND 5 AND pluscfrequnit IN ('MONTHS'))
+            OR (fnlconstraint <= CURRENT_TIMESTAMP 
+                AND CURRENT_TIMESTAMP > DATEADD(DAY, 36, targcompdate) 
+                AND pluscfrequency BETWEEN 5 AND 11 AND pluscfrequnit IN ('MONTHS'))
+            OR (fnlconstraint < CURRENT_TIMESTAMP 
+                AND CURRENT_TIMESTAMP > DATEADD(DAY, 50, targcompdate) 
+                AND pluscfrequency >= 1 AND pluscfrequnit IN ('YEARS'))
+        )
+        AND status NOT IN ('COMP', 'CORRTD', 'MISSED', 'PENRVW', 'PENDQA', 'FLAGGED', 'REVWD')
+        AND assignedownergroup IN ('FWNAE', 'FWNLC1', 'FWNLC2', 'FWNPS')
+        THEN 1 ELSE 0 
+    END) AS 'ProdMaint Risk Missed',
+
+    -- Flagged work orders
+    SUM(CASE 
+        WHEN status = 'FLAGGED'
+        AND assignedownergroup IN ('FWNAE', 'FWNLC1', 'FWNLC2', 'FWNPS')
+        THEN 1 ELSE 0 
+    END) AS 'ProdMaint Flagged',
+
+    -- Missed work orders
+    SUM(CASE 
+        WHEN status = 'MISSED'
+        AND assignedownergroup IN ('FWNAE', 'FWNLC1', 'FWNLC2', 'FWNPS')
+        THEN 1 ELSE 0 
+    END) AS 'ProdMaint Missed'
 
 FROM workorder
-WHERE 
-	woclass in('WORKORDER','ACTIVITY') AND historyflag = 0 AND istask = 0 AND siteid = 'FWN' 
-	--AND targcompdate >= DATEADD(MONTH, DATEDIFF(MONTH,0,CURRENT_TIMESTAMP)-1,0) --Previous Month			
+WHERE woclass in('WORKORDER','ACTIVITY') AND historyflag = 0 AND istask = 0 AND siteid = 'FWN';
+	--AND targcompdate >= DATEADD(MONTH, DATEDIFF(MONTH,0,CURRENT_TIMESTAMP)-1,0) --Previous Month	
 
 --CritSys
 SELECT
