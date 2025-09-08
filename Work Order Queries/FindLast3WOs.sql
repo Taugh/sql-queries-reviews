@@ -23,7 +23,7 @@ Security         : Ensure access to workorder and worklog tables is restricted
 
 Version Control  : https://github.com/Taugh/sql-queries-reviews/tree/main/Work%20Order%20Queries/FindLast3WOs.sql
 
-Change Log       : 2023-09-08, Brannon, Troy – Initial review and refactor
+Change Log       : 2025-09-08, Brannon, Troy – Initial review and refactor
 ============================================================================ */
 
 SELECT 
