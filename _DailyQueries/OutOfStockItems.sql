@@ -1,7 +1,7 @@
 USE max76PRD
 GO
 
-/***************************************************************************************************
+/*****************************************************************************************
 Query Name: WO_Stockout_And_Unclaimed_Orders.sql
 Location / File Path: sql/inventory/WO_Stockout_And_Unclaimed_Orders.sql
 
@@ -45,7 +45,8 @@ Version Control:
 Change Log:
   2025-09-05  TB/M365  Initial review AND header standardization: clarified logic, added filters,
                        ensured JOIN safety, aligned WITH reporting standards.
-***************************************************************************************************/
+
+***********************************************************************************/
 
 
 SELECT DISTINCT r.itemnum

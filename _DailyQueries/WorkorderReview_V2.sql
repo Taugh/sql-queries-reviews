@@ -1,7 +1,8 @@
 USE max76PRD
 GO
 
-/***************************************************************************************************
+/*****************************************************************************************
+
 Query Name: WO_Review_Flags_PendingReview.sql
 Location / File Path: sql/work_orders/WO_Review_Flags_PendingReview.sql
 
@@ -41,7 +42,7 @@ Version Control:
 Change Log:
   2025-09-05  TB/M365  Refactor for clarity & performance: modular CTEs, QA filter, UNION ALL,
                        qualified columns, consistent casing, standardized header.
-************************************************************************************************** */
+*****************************************************************************************/
 
 DECLARE @site1 VARCHAR(3) = 'FWN';
 DECLARE @site2 VARCHAR(5) = 'ASPEX';
