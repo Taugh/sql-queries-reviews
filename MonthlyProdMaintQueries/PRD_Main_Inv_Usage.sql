@@ -6,16 +6,16 @@ Location / File Path: sql/work_orders/WO_Inventory_Usage_ByTeam_LastMonth.sql
 
 Purpose:
   Report material requisitions (MR/MRLINE) attributed to maintenance teams (by Work Order owner
-  group) for last month at a given site. Uses MR as the source of "usage" (requested/issued
-  through requisitions) and ties lines to WOs via MRLINE.REFWO.
+  group) for last month at a given site. Uses MR AS the source of "usage" (requested/issued
+  through requisitions) AND ties lines to WOs via MRLINE.REFWO.
 
 Row Grain:
   One row per MR line (MRLINE).
 
 Assumptions:
   - MRLINE.REFWO links to WORKORDER.WONUM for the same SITEID.
-  - MR and MRLINE both carry SITEID and should match to prevent cross-site joins.
-  - Team ownership can be on either WO.ASSIGNEDOWNERGROUP or WO.OWNERGROUP.
+  - MR AND MRLINE both carry SITEID AND should match to prevent cross-site joins.
+  - Team ownership can be ON either WO.ASSIGNEDOWNERGROUP OR WO.OWNERGROUP.
 
 Parameters:
   @SiteID           : Target site (default 'FWN')
@@ -24,15 +24,15 @@ Parameters:
   @Groups           : Set of owner groups to include (default: FWNLC1, FWNPS)
 
 Filters:
-  - MR at @SiteID with status NOT IN ('CAN','DRAFT')
+  - MR at @SiteID WITH status NOT IN ('CAN','DRAFT')
   - MR.ENTERDATE within last month
-  - WO team in @Groups via ASSIGNEDOWNERGROUP or OWNERGROUP
+  - WO team in @Groups via ASSIGNEDOWNERGROUP OR OWNERGROUP
 
 Security:
   - Read-only; no sensitive columns.
 
 Version Control:
-  - Store under /sql/work_orders with a paired doc under /docs/work_orders.
+  - Store under /sql/work_orders WITH a paired doc under /docs/work_orders.
 
 Change Log:
   2025-09-04  TB/M365  Refactor for clarity & performance: site-safe joins, params, SARGable dates,
@@ -45,10 +45,10 @@ DECLARE @SiteID sysname = N'FWN';
 DECLARE @StartOfPrevMonth date = DATEADD(DAY, 1, EOMONTH(SYSDATETIME(), -2));
 DECLARE @StartOfThisMonth date = DATEADD(DAY, 1, EOMONTH(SYSDATETIME(), -1));
 
--- Owner groups (edit as needed)
+-- Owner groups (edit AS needed)
 DECLARE @Groups TABLE (GroupID sysname PRIMARY KEY);
 INSERT INTO @Groups (GroupID)
-VALUES (N'FWNLC1'), (N'FWNPS');  -- add more as needed (e.g., FWNLC2, FWNMOS)
+VALUES (N'FWNLC1'), (N'FWNPS');  -- add more AS needed (e.g., FWNLC2, FWNMOS)
 
 SELECT
     mr.mrnum					AS [Requisition],
@@ -73,7 +73,7 @@ INNER JOIN dbo.mrline AS mrl
     AND mrl.siteid = mr.siteid     -- ensure same site
 INNER JOIN dbo.workorder AS wo
     ON  wo.wonum  = mrl.refwo
-    AND wo.siteid = mrl.siteid     -- ensure same site as the line
+    AND wo.siteid = mrl.siteid     -- ensure same site AS the line
 WHERE
     mr.siteid = @SiteID
     AND mr.status NOT IN ('CAN', 'DRAFT')

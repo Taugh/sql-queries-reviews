@@ -3,7 +3,7 @@ USE max76PRD
 /*
   =============================================
   Query: Returns Transactions
-  Purpose: Identify all return transactions from the previous month
+  Purpose: Identify all return transactions FROM the previous month
   Author: Troy Brannon
   Date: 2025-09-04
   Version: 1.0
@@ -11,8 +11,8 @@ USE max76PRD
 */
 
 -- Declare reusable date variables
-DECLARE @StartDate DATETIME = DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0);
-DECLARE @EndDate   DATETIME = DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0);
+DECLARE @StartDate DATETIME2 = DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0);
+DECLARE @EndDate   DATETIME2 = DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0);
 
 -- Returns Only
 SELECT 
@@ -23,7 +23,7 @@ SELECT
     m.enterby AS 'Entered By',
     m.actualdate AS 'Return Date',
     m.issuetype
-FROM a_matusetrans AS m
+FROM dbo.a_matusetrans AS m
 WHERE m.siteid = 'FWN'
   AND m.eaudittimestamp >= @StartDate
   AND m.eaudittimestamp < @EndDate

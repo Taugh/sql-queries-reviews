@@ -1,7 +1,7 @@
 
--- Identify inventory items with non-zero YTD usage
+-- Identify inventory items WITH non-zero YTD usage
 -- but last issued before the start of the current year
--- These items may not have rolled over correctly on January 1st
+-- These items may NOT have rolled over correctly ON January 1st
 
 SELECT
     itemnum,

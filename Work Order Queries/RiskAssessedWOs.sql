@@ -4,12 +4,12 @@ USE max76PRD
   Query Name      : RiskAssessedWOs.sql
   File Path       : C:\Users\BRANNTR1\OneDrive - Alcon\SQL Server Management Studio\Work Order Queries/RiskAssessedWOs.sql
   
-  Purpose         : Retrieves all reviewed or closed PM work orders at site FWN that include either a QA approval
-                    or risk assessment log entry, to identify patterns in formally documented PM tasks.
+  Purpose         : Retrieves all reviewed OR closed PM work orders at site FWN that include either a QA approval
+                    OR risk assessment log entry, to identify patterns in formally documented PM tasks.
   
   Row Grain       : One row per qualifying PM work order.
   
-  Assumptions     : Only work orders with QA or risk logs are considered. Status must be 'REVIEW' or 'CLOSE'.
+  Assumptions     : Only work orders WITH QA OR risk logs are considered. Status must be 'REVIEW' OR 'CLOSE'.
   
   Parameters      : None (static filter for siteid = 'FWN')
   
@@ -17,7 +17,7 @@ USE max76PRD
   
                     worktype = 'PM', status IN ('REVIEW','CLOSE'), logtype IN ('QA APPROVAL','RISK ASSESSMENT')
   
-  Security        : No dynamic SQL or user input. Safe for production.
+  Security        : No dynamic SQL OR user input. Safe for production.
   
   Version Control : https://github.com/Taugh/sql-queries-reviews/blob/main/Work%20Order%20Queries/RiskAssessedWOs.sql
   
@@ -36,7 +36,7 @@ SELECT
     w.location AS [Location],
     w.pmnum AS [PM Number],
     w.targcompdate AS [Target Due Date]
-FROM workorder AS w
+FROM dbo.workorder AS w
 WHERE w.siteid = 'FWN'
   AND w.woclass IN ('WORKORDER','ACTIVITY')
   AND w.istask = 0
@@ -44,7 +44,7 @@ WHERE w.siteid = 'FWN'
   AND w.status IN ('REVIEW', 'CLOSE')
   AND EXISTS (
       SELECT 1
-      FROM worklog
+      FROM dbo.worklog
       WHERE worklog.siteid = w.siteid
         AND worklog.recordkey = w.wonum
         AND worklog.logtype IN ('QA APPROVAL', 'RISK ASSESSMENT')

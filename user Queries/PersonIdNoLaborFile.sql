@@ -2,27 +2,27 @@ USE max76PRD
 GO
 
 /* ============================================================================
-Query Name       : Active Persons Missing Labor or User Profiles
+Query Name       : Active Persons Missing Labor OR User Profiles
 File Path        : C:\Users\BRANNTR1\OneDrive - Alcon\SQL Server Management Studio\User Queries\PersonIdNoLaborFile.sql
 
-Purpose          : Identifies active persons at site FWN who lack labor profiles or user records, excluding management titles.
+Purpose          : Identifies active persons at site FWN who lack labor profiles OR user records, excluding management titles.
 
-Row Grain        : One row per person missing labor or user profile
+Row Grain        : One row per person missing labor OR user profile
 
-Assumptions      : Titles containing 'Manager' or matching specific roles are excluded; laborcode and personid null checks indicate missing profiles
+Assumptions      : Titles containing 'Manager' OR matching specific roles are excluded; laborcode AND personid null checks indicate missing profiles
 
 Parameters       : None
 
 Filters          : status = 'ACTIVE', locationsite = 'FWN', title exclusions, laborcode IS NULL, personid IS NULL
 
-Security         : Ensure access to person, labor, and maxuser tables is restricted
+Security         : Ensure access to person, labor, AND maxuser tables is restricted
 
 Version Control  : https://github.com/Taugh/sql-queries-reviews/blob/main/User%20Queries/PersonIdNoLaborFile.sql
 
-Change Log       : 2025-09-08, Brannon, Troy – Initial review and refactor
+Change Log       : 2025-09-08, Brannon, Troy – Initial review AND refactor
 ============================================================================ */
 
--- Query 1: Looks for person IDs with no labor profile
+-- Query 1: Looks for person IDs WITH no labor profile
 SELECT 
     p.personid AS [Person ID],
     p.status AS [Status],
@@ -31,10 +31,10 @@ SELECT
     p.title AS [Title],
     p.supervisor AS [Supervisor],
     l.personid AS [Labor]
-FROM person AS p
-LEFT JOIN labor AS l
+FROM dbo.person AS p
+LEFT JOIN dbo.labor AS l
     ON p.personid = l.personid
-INNER JOIN maxuser AS m
+INNER JOIN dbo.maxuser AS m
     ON p.personid = m.personid
 WHERE 
     p.status = 'ACTIVE'
@@ -47,13 +47,13 @@ WHERE
     AND p.title NOT LIKE '%Manager%'
     AND NOT EXISTS (
         SELECT 1
-        FROM maxuser
+        FROM dbo.maxuser
         WHERE personid = l.personid
     )
 ORDER BY 
     p.supervisor;
 
--- Query 2: Looks for person IDs with no user profile
+-- Query 2: Looks for person IDs WITH no user profile
 SELECT 
     p.personid AS [Person ID],
     p.status AS [Status],
@@ -63,8 +63,8 @@ SELECT
     p.supervisor AS [Supervisor],
     l.personid AS [User],
     l.status AS [User Status]
-FROM person AS p
-LEFT JOIN maxuser AS l
+FROM dbo.person AS p
+LEFT JOIN dbo.maxuser AS l
     ON p.personid = l.personid
 WHERE 
     p.status = 'ACTIVE'

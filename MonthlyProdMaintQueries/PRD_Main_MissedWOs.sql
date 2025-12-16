@@ -5,12 +5,12 @@ Query Name: WO_Prod_Maint_MissedWorkOrders_LastMonth.sql
 Location / File Path: sql/work_orders/WO_Prod_Maint_MissedWorkOrders_LastMonth.sql
 
 Purpose:
-  List Production Maintenance work orders that were flagged as MISSED since the start of last month,
-  scoped to specific maintenance teams, and whose Target Completion Date fell last month.
+  List Production Maintenance work orders that were flagged AS MISSED since the start of last month,
+  scoped to specific maintenance teams, AND whose Target Completion Date fell last month.
 
 Behavior Notes:
-  - Aligns with the original query: requires MISSED.changedate >= start of last month (no upper bound).
-  - WOs flagged MISSED on/after the first day of the current month still appear if their targcompdate
+  - Aligns WITH the original query: requires MISSED.changedate >= start of last month (no upper bound).
+  - WOs flagged MISSED ON/after the first day of the current month still appear if their targcompdate
     was last month.
 
 Row Grain:
@@ -31,7 +31,7 @@ DECLARE @SiteID sysname = N'FWN';
 DECLARE @StartOfPrevMonth date = DATEADD(MONTH, DATEDIFF(MONTH, 0, CURRENT_TIMESTAMP) - 1, 0);
 DECLARE @StartOfThisMonth date = DATEADD(MONTH, DATEDIFF(MONTH, 0, CURRENT_TIMESTAMP) + 0, 0);
 
--- Production maintenance owner groups (edit as needed)
+-- Production maintenance owner groups (edit AS needed)
 DECLARE @Groups TABLE (GroupID sysname PRIMARY KEY);
 INSERT INTO @Groups (GroupID)
 VALUES (N'FWNLC1'), (N'FWNPS');
@@ -85,7 +85,7 @@ SELECT
     assignedownergroup          AS [Owner Group],
     owner                       AS [Assigned To],
     targcompdate                AS [Due Date],
-    changedate                  AS [Date Flagged as Missed]
+    changedate                  AS [Date Flagged AS Missed]
 FROM Base
 ORDER BY
     COALESCE(assignedownergroup, ownergroup), wonum;

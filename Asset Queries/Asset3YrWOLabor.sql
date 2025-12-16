@@ -1,11 +1,11 @@
 USE max76PRD
 GO
 
--- Purpose: Summarize unscheduled labor hours and work order counts per asset
---          for the past 3 years (2022–2024) at site 'FWN' for specific owner groups.
+-- Purpose: Summarize unscheduled labor hours AND work order counts per asset
+--          for the past 3 years (2022â€“2024) at site 'FWN' for specific owner groups.
 -- Notes:
---   - Filters for CM worktype and excludes tasks.
---   - Groups by asset number and description.
+--   - Filters for CM worktype AND excludes tasks.
+--   - Groups by asset number AND description.
 
 SELECT 
     w.assetnum, -- Asset identifier
@@ -50,8 +50,8 @@ SELECT
         THEN w.actlabhrs ELSE 0 
     END) AS [2024 Downtime]
 
-FROM workorder AS w
-INNER JOIN asset AS a
+FROM dbo.workorder AS w
+INNER JOIN dbo.asset AS a
     ON w.siteid = a.siteid AND w.assetnum = a.assetnum
 WHERE 
     w.woclass IN ('WORKORDER', 'ACTIVITY') 

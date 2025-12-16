@@ -1,0 +1,14 @@
+USE max76PRD
+GO
+
+
+SELECT DISTINCT v.itemnum
+	,v.modelnum
+	,minlevel
+	,orderqty
+FROM dbo.invvendor AS v
+	INNER JOIN dbo.inventory AS i
+ON v.itemnum = i.itemnum AND v.orgid = i.orgid
+WHERE v.orgid = 'US' AND v.siteid in ('ASPEX','FWN') AND i.status NOT in ('OBSOLETE')
+	AND v.modelnum in ('828-21176-001','A 6R55M115150','115907-7237','021261-0520','018455-0011','022259-2520','022259-5010','001862-0000','001863-0000','001864-0000','022233-0000','021136-0002','99R12','6A55M040NF1512','019614-0077','440R-N23132','EX600-DXPD','MK5209','MY1H32G-390AZ','98410A115','21055','HG0900404','42CF-D1LPA1-D4','879D-F4ACDM-0M6','889D-F4ACDM-5')
+ORDER BY modelnum

@@ -2,10 +2,10 @@ USE max76PRD --ASPEX FWN MONTHLY QSR Query V2 Generated, Completed, MISSED
 GO
 
 DECLARE @site TABLE (siteid VARCHAR(8)) INSERT INTO @site(siteid) VALUES ('--ASPEX'),('FWN')	--Site Selection
-DECLARE @date AS DATETIME = {ts '2024-01-01 00:00:00'}											--Fixed date
-DECLARE @date2 AS DATETIME = DATEADD(MONTH,DATEDIFF(MONTH,0,GETDATE())+0, +0)						--Day 1, This Month
-DECLARE @MonDate TABLE (PreMonDate DATETIME, CurMonDate DATETIME) 
-		INSERT INTO @MonDate(PreMonDate, CurMonDate) VALUES (DATEADD(MONTH,DATEDIFF(MONTH,0,GETDATE())-1, +0), @date2)  -- Change dates here and 
+DECLARE @date AS DATETIME2 = {ts '2024-01-01 00:00:00'}											--Fixed date
+DECLARE @date2 AS DATETIME2 = DATEADD(MONTH,DATEDIFF(MONTH,0,GETDATE())+0, +0)						--Day 1, This Month
+DECLARE @MonDate TABLE (PreMonDate DATETIME2, CurMonDate DATETIME2)								--Table to hold previous month AND current month dates
+		INSERT INTO @MonDate(PreMonDate, CurMonDate) VALUES (DATEADD(MONTH,DATEDIFF(MONTH,0,GETDATE())-1, +0), @date2)  -- Change dates here AND 
 
 --	Work Orders Generated
 SELECT
@@ -21,12 +21,17 @@ SELECT
 	,w.targcompdate AS 'Target Complete Date'
 	,w.ownergroup AS 'Owner Group'
 	,w.assignedownergroup AS 'Assigned Owner Group'
-FROM workorder AS w
-	INNER JOIN pm AS p
+FROM dbo.workorder AS w
+	INNER JOIN dbo.pm AS p
 ON p.pmnum = w.pmnum AND p.siteid = w.siteid
-WHERE w.istask = 0 AND woclass in ('WORKORDER','ACTIVITY') AND w.siteid IN(SELECT siteid FROM @site)
+WHERE w.istask = 0 AND woclass in ('WORKORDER','ACTIVITY') AND w.siteid IN(
+	SELECT siteid 
+	FROM @site)
 	AND w.worktype IN('PM','CA','RQL')
-	AND targcompdate > (SELECT PreMonDate FROM @MonDate) AND w.targcompdate <= (SELECT CurMonDate FROM @MonDate)
+	AND targcompdate > (SELECT PreMonDate 
+						FROM @MonDate) 
+	AND w.targcompdate <= (SELECT CurMonDate 
+						   FROM @MonDate)
 	--AND workorder.targstartdate > @date AND workorder.targstartdate <= @date2
 ORDER BY w.wonum ASC;
 
@@ -46,16 +51,18 @@ SELECT
 	,w.fnlconstraint AS 'Finish No Later than Date'
 	,w.ownergroup AS 'Owner Group'
 	,w.assignedownergroup AS 'Assigned Owner Group'
-FROM workorder AS w
-	INNER JOIN pm AS p
+FROM dbo.workorder AS w
+	INNER JOIN dbo.pm AS p
 ON p.pmnum = w.pmnum AND p.siteid = w.siteid
 WHERE
-	w.istask = 0 AND woclass in ('WORKORDER','ACTIVITY') AND w.siteid IN(SELECT siteid FROM @site)
+	w.istask = 0 AND woclass in ('WORKORDER','ACTIVITY') AND w.siteid IN(
+	SELECT siteid 
+	FROM @site)
 	AND w.worktype IN('PM','CA','RQL')
 	AND w.actfinish > (SELECT PreMonDate FROM @MonDate)
 	AND w.actfinish <= (SELECT CurMonDate FROM @MonDate)
 	AND w.wonum NOT IN(SELECT s.wonum 
-					   FROM wostatus AS s
+					   FROM dbo.wostatus AS s
 					   WHERE s.wonum = w.wonum AND s.siteid = w.siteid AND s.status IN ('MISSED'))
 ORDER BY w.wonum ASC;
 
@@ -79,15 +86,17 @@ SELECT
 		WHEN ((p.frequency >= 1 AND p.frequnit IN ('YEARS')) OR (p.frequency >= 12 AND p.frequnit IN ('MONTHS')))								THEN DATEADD(DAY,30,w.fnlconstraint)
 	END AS 'Missed Date'
 	,w.assignedownergroup AS 'Assigned Owner Group'
-FROM workorder AS w
-	INNER JOIN pm AS p
+FROM dbo.workorder AS w
+	INNER JOIN dbo.pm AS p
 ON p.pmnum = w.pmnum AND p.siteid = w.siteid
 WHERE
-	w.istask = 0 AND woclass in ('WORKORDER','ACTIVITY') AND w.siteid IN(SELECT siteid FROM @site)
+	w.istask = 0 AND woclass in ('WORKORDER','ACTIVITY') AND w.siteid IN(
+	SELECT siteid 
+	FROM @site)
 	AND w.worktype IN ('PM','CA','RQL')
 	AND w.actfinish > (SELECT PreMonDate FROM @MonDate)
 	AND w.actfinish <= (SELECT CurMonDate FROM @MonDate)
 	AND w.wonum IN(SELECT s.wonum 
-				   FROM wostatus AS s
+				   FROM dbo.wostatus AS s
 				   WHERE s.wonum = w.wonum AND s.siteid = w.siteid AND s.status IN('MISSED'))
 ORDER BY w.wonum ASC

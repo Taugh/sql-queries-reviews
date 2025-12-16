@@ -1,0 +1,13 @@
+#Ignore these folders
+ASPEX Queries/
+Vulnerability Assessment Reports/
+ConditionalExpress/
+
+#Ignore these files
+_DailyQueries/RAChecks.sql
+_WeeklyReports/AdjustedItemsLast7Days.sql
+_WeeklyReports/IssuedItemsLast7Days.sql
+_WeeklyReports/NoOwnerGroup.sql
+_WeeklyReports/ReturnedItemsLast7Days.sql
+_WeeklyReports/ShrinkageLast7Days.sql
+_WeeklyReports/testQuery.sql

@@ -8,15 +8,15 @@ Author           : Troy Brannon
 Created          : 2025-09-05
 Version          : 1.0
 
-Purpose          : Compare purchase order lines with corresponding purchase requisition lines
-                   for open POs at a specific site and location. Filters out completed and
+Purpose          : Compare purchase order lines WITH corresponding purchase requisition lines
+                   for open POs at a specific site AND location. Filters out completed AND
                    closed orders.
 
 Row Grain        : One row per itemnum per PO line.
 
 Assumptions      : 
-                   - Only active POs are considered (not canceled, closed, revised, etc.).
-                   - Receipts must not be marked as complete.
+                   - Only active POs are considered (NOT canceled, closed, revised, etc.).
+                   - Receipts must NOT be marked AS complete.
                    - Site ID is hardcoded but can be parameterized.
 
 Parameters       : 
@@ -28,7 +28,7 @@ Filters          :
                    - PO receipts != 'COMPLETE'
                    - PO line receiptscomplete = 0
 
-Security         : No sensitive data exposed. Ensure access to po, poline, and prline tables
+Security         : No sensitive data exposed. Ensure access to po, poline, AND prline tables
                    is properly controlled.
 
 Version Control  : Stored in GitHub repository 'sql-queries-reviews'
@@ -37,7 +37,7 @@ Version Control  : Stored in GitHub repository 'sql-queries-reviews'
                    Last Reviewed: 2025-09-05 by Troy Brannon
 
 Change Log       : 
-                   - 2025-09-05: Refactored for clarity, modularity, and maintainability.
+                   - 2025-09-05: Refactored for clarity, modularity, AND maintainability.
 ******************************************************************************************/
 
 -- Declare site parameter
@@ -46,7 +46,7 @@ DECLARE @siteid VARCHAR(8) = 'FWN';
 -- CTE to isolate valid PO lines
 WITH ValidPO AS (
     SELECT ponum, siteid
-    FROM po
+    FROM dbo.po
     WHERE siteid = @siteid
       AND status NOT IN ('CAN','CLOSE','PNDREV','REVISD')
       AND receipts != 'COMPLETE'
@@ -59,8 +59,8 @@ SELECT
     r.prnum,
     r.orderqty AS [PR Qty]
 FROM ValidPO AS p
-INNER JOIN poline AS l
+INNER JOIN dbo.poline AS l
     ON p.ponum = l.ponum AND p.siteid = l.siteid
-INNER JOIN prline AS r
+INNER JOIN dbo.prline AS r
     ON p.ponum = r.ponum AND p.siteid = r.siteid
 WHERE l.receiptscomplete = 0;

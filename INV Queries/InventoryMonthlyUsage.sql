@@ -1,0 +1,42 @@
+USE max76PRD
+GO
+
+--Returns all MR lines that were issued for the previous month
+SELECT DISTINCT u.invusenum AS 'Usage'
+	,l.itemnum AS 'Item #'
+	,l.description AS 'Description'
+	,l.enterby AS 'Entered By'
+	,l.issueto AS 'Issued To'
+	,l.refwo AS 'Work Order'
+	,l.actualdate AS 'Issue Date'
+	,l.quantity AS 'Quantity'
+	,l.unitcost AS 'Unit Cost'
+	,l.linecost AS 'Line Cost'
+FROM dbo.invuse AS u
+	INNER JOIN dbo.invuseline AS l
+ON u.invusenum = l.invusenum
+	INNER JOIN dbo.workorder AS w
+ON l.refwo = w.wonum
+WHERE (u.status in ('COMPLETE','CLOSED') AND u.siteid = 'FWN') AND l.itemnum in ('100668','100669','100800','100905','100921','100997','101456','101462','101467','101863','102607','102717','102815','103044','103416','103656','104069','104304','104381','104723','105134','105542','105674','105760','105868','107688','108884','110267','111418','111619','111740','500577','103339','111662','112123','100754','104803','112452','103142','104533','500365','112579','108684','112662','102092','111256','109585','109689','107137','109203','100804','104170','100802','102012','108933','102748','100309','114865','114871','104522','104521','110572','500220','104411','101010','105946','105945','102240','109195','112948','115922','100725','101465','116304','116303','116305','116313','116311','106223','102992','102552','104241','103567','106256','102241','116341','103649','103918','101969','500411','102616','102025','106261','112582','118807','109689A','107626','100788','500368','100804A','101467A','100754A','100754A','111048','109585A','111047','100777','100874','118786','113395A','118768','117951','111549','116031','121020','100725A','111091','100771','104190')
+	AND l.actualdate >= dateadd(year,datediff(year,0,getdate())-2,0)
+	AND l.actualdate < dateadd(month,datediff(month,0,getdate())+0,0)
+	AND w.assetnum = '373'
+ORDER BY actualdate desc;
+
+--Counts all usage records for the previous month
+SELECT DISTINCT count(u.invusenum)
+FROM dbo.invuse AS u
+	INNER JOIN dbo.invuseline AS l
+ON l.invusenum = u.invusenum
+WHERE (u.status in ('COMPLETE','CLOSED') AND u.siteid = 'FWN') 
+	AND l.actualdate >= dateadd(month,datediff(month,0,getdate())-1,0)
+	AND l.actualdate < dateadd(month,datediff(month,0,getdate())+0,0);
+
+
+SELECT sum(cast(l.linecost AS money)) AS 'Total Expense'
+FROM dbo.invuseline AS l
+	INNER JOIN dbo.invuse AS u
+ON l.invusenum = u.invusenum
+WHERE (u.status in ('COMPLETE','CLOSED') AND u.siteid = 'FWN')
+	 AND u.changedate >= dateadd(month,datediff(month,0,getdate())-1,0)
+	 AND u.changedate < dateadd(month,datediff(month,0,getdate())+0,0);

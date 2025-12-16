@@ -1,0 +1,9 @@
+USE Max76PRD
+GO
+
+
+SELECT DISTINCT assetnum
+    ,DESCRIPTION
+    ,STATUS
+FROM dbo.asset
+WHERE siteid = 'FWN' AND statusdate >= DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE())-9, 0)

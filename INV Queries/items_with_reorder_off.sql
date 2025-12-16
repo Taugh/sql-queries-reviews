@@ -1,12 +1,12 @@
 
--- Find inventory items with reorder turned off
--- Includes item details, usage history, vendor info, and asset associations
--- Uses a CTE to select the latest vendor record per item and site
+-- Find inventory items WITH reorder turned off
+-- Includes item details, usage history, vendor info, AND asset associations
+-- Uses a CTE to SELECT the latest vendor record per item AND site
 
 WITH LatestVendor AS (
-    SELECT *
+    SELECT 1
     FROM (
-        SELECT *,
+        SELECT 1,
                ROW_NUMBER() OVER (PARTITION BY itemnum, siteid ORDER BY lastdate DESC) AS rn
         FROM dbo.invvendor
     ) AS ranked
@@ -19,7 +19,7 @@ SELECT DISTINCT
     inv.status AS [Item Status],
     inv.gmpcritical AS [GMP Critical],
     inv.criticalspare AS [Critical Spare],
-    ISNULL(CONVERT(varchar(10), inv.lastissuedate, 120), '') AS [Last Issued],
+    ISNULL(inv.lastissuedate, '') AS [Last Issued],
     ISNULL(b.curbal, 0) AS [Current Balance],
     ISNULL(r.reservedqty, 0) AS [Reserved Quantity],
     COALESCE((b.curbal - r.reservedqty), b.curbal, 0) AS [Available Quantity],

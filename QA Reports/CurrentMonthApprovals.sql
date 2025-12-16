@@ -9,13 +9,13 @@ Author          : Troy Brannon
 Date Created    : 2025-09-05
 Version         : 1.00
 
-Purpose         : Retrieves work orders that underwent risk assessment and were approved
+Purpose         : Retrieves work orders that underwent risk assessment AND were approved
                   by QA during the current month.
 
-Row Grain       : One row per work order with QA approval log
+Row Grain       : One row per work order WITH QA approval log
 
 Assumptions     : 
-    - QA approval is logged with logtype = 'QA APPROVAL'.
+    - QA approval is logged WITH logtype = 'QA APPROVAL'.
     - Risk assessment is implied by status codes: PENDQA, PENRVW, REVWD.
 
 Parameters      : None
@@ -29,12 +29,12 @@ Filters         :
     - QA approval date in current month
     - logtype = 'QA APPROVAL'
 
-Security        : No dynamic SQL or user input. Safe for deployment.
+Security        : No dynamic SQL OR user input. Safe for deployment.
 
 Version Control : Staged for GitHub in 'sql-queries-reviews' repository.
 
 Change Log      : 
-    - 2025-09-05: Initial review and header added by Copilot
+    - 2025-09-05: Initial review AND header added by Copilot
 ******************************************************************************************/
 
 WITH qa_status AS (
@@ -44,7 +44,7 @@ WITH qa_status AS (
         s.status,
         s.changedate,
         s.changeby
-    FROM wostatus AS s
+    FROM dbo.wostatus AS s
     WHERE s.siteid = 'FWN'
         AND s.status IN ('PENDQA','PENRVW','REVWD')
 )
@@ -60,14 +60,14 @@ SELECT
     l.createdate AS [Date QA Approved],
     l.createby AS [Approved By 521],
     p1.displayname AS [Approved By Name]
-FROM workorder AS w
+FROM dbo.workorder AS w
 INNER JOIN qa_status AS qs
     ON w.wonum = qs.wonum AND w.siteid = qs.siteid
-INNER JOIN person AS p
+INNER JOIN dbo.person AS p
     ON qs.changeby = p.personid
-INNER JOIN worklog AS l
+INNER JOIN dbo.worklog AS l
     ON w.wonum = l.recordkey AND w.siteid = l.siteid
-INNER JOIN person AS p1
+INNER JOIN dbo.person AS p1
     ON l.createby = p1.personid
 WHERE w.woclass IN ('WORKORDER','ACTIVITY')
     AND w.historyflag = 0 

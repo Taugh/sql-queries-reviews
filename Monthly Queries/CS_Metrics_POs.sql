@@ -2,8 +2,8 @@ Use max76PRD
 
 /*
   =============================================
-  Report: Central Stores Metrics – Purchase Orders
-  Purpose: Monthly metrics for PO activity, aging, and cost
+  Report: Central Stores Metrics â€“ Purchase Orders
+  Purpose: Monthly metrics for PO activity, aging, AND cost
   Author: Troy Brannon
   Date: 2025-09-04
   Version: 1.0
@@ -11,10 +11,10 @@ Use max76PRD
 */
 
 -- Declare reusable date variables
-DECLARE @StartDate DATETIME = DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0);
-DECLARE @EndDate   DATETIME = DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0);
-DECLARE @SixtyDaysAgo DATETIME = DATEADD(DAY, -60, GETDATE());
-DECLARE @NextMonthStart DATETIME = DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) + 1, 0);
+DECLARE @StartDate DATETIME2 = DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) - 1, 0);
+DECLARE @EndDate   DATETIME2 = DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0);
+DECLARE @SixtyDaysAgo DATETIME2 = DATEADD(DAY, -60, GETDATE());
+DECLARE @NextMonthStart DATETIME2 = DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) + 1, 0);
 
 -- POs Issued Last Month
 SELECT COUNT(ponum) AS 'POs Issued'
@@ -40,7 +40,7 @@ FROM dbo.po
 WHERE historyflag = 0 AND receipts != 'COMPLETE' AND siteid = 'FWN'
   AND orderdate >= @SixtyDaysAgo AND orderdate < @NextMonthStart;
 
--- POs with Required Date Older Than 60 Days
+-- POs WITH Required Date Older Than 60 Days
 SELECT COUNT(ponum) AS 'POs +60 Require Date'
 FROM dbo.po
 WHERE historyflag = 0 AND receipts != 'COMPLETE' AND siteid = 'FWN'

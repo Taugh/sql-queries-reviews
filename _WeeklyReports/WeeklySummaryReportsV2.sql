@@ -2,11 +2,11 @@ USE max76PRD
 GO
 
 -- Weekly Work Order Summary Report
--- Filters by assignedownergroup and categorizes work orders by status and timing
+-- Filters by assignedownergroup AND categorizes work orders by status AND timing
 -- This version is for ProdMaint groups: FWNAE, FWNLC1, FWNLC2, FWNPS
 
 SELECT
-    -- Work orders due by end of current week
+    -- Work orders due by END of current week
     SUM(CASE 
         WHEN targcompdate BETWEEN 
             DATEADD(DAY, DATEDIFF(DAY, 0, CURRENT_TIMESTAMP), 0) AND 
@@ -17,7 +17,7 @@ SELECT
         THEN 1 ELSE 0 
     END) AS 'ProdMaint EOW',
 
-    -- Work orders due by end of current month
+    -- Work orders due by END of current month
     SUM(CASE 
         WHEN targcompdate = DATEADD(MONTH, DATEDIFF(MONTH, 0, CURRENT_TIMESTAMP) + 1, 0)
         AND worktype IN ('CA', 'PM', 'RM', 'RQL')
@@ -37,7 +37,7 @@ SELECT
         THEN 1 ELSE 0 
     END) AS 'ProdMaint Risk Late',
 
-    -- Work orders at risk of being missed based on frequency and timing
+    -- Work orders at risk of being missed based ON frequency AND timing
     SUM(CASE 
         WHEN targcompdate <= DATEADD(MONTH, DATEDIFF(MONTH, 0, CURRENT_TIMESTAMP) + 1, 0)
         AND (
@@ -72,7 +72,7 @@ SELECT
         THEN 1 ELSE 0 
     END) AS 'ProdMaint Missed'
 
-FROM workorder
+FROM dbo.workorder
 WHERE woclass in('WORKORDER','ACTIVITY') AND historyflag = 0 AND istask = 0 AND siteid = 'FWN';
 	--AND targcompdate >= DATEADD(MONTH, DATEDIFF(MONTH,0,CURRENT_TIMESTAMP)-1,0) --Previous Month	
 
@@ -97,24 +97,24 @@ SELECT
 			THEN 1 ELSE 0 END) AS 'CritSys Risk Late'
 			
 	,SUM(CASE WHEN (targcompdate <= DATEADD(MONTH, DATEDIFF(MONTH,0,CURRENT_TIMESTAMP)+1, 0) AND ((CURRENT_TIMESTAMP >= (DATEADD(DAY,-10,targcompdate)) 
-				AND pluscfrequency IN('1','7','14') AND pluscfrequnit IN('DAYS','MONTHS')) or ((fnlconstraint < CURRENT_TIMESTAMP) 
+				AND pluscfrequency IN('1','7','14') AND pluscfrequnit IN('DAYS','MONTHS')) OR ((fnlconstraint < CURRENT_TIMESTAMP) 
 				AND CURRENT_TIMESTAMP > (DATEADD(DAY,8,targcompdate)) AND pluscfrequency between 2 AND 5 AND pluscfrequnit IN('MONTHS')) 
-				or (fnlconstraint <= CURRENT_TIMESTAMP AND CURRENT_TIMESTAMP > (DATEADD(DAY,36,targcompdate)) 
-				AND pluscfrequency between 5 AND 11 AND pluscfrequnit IN('MONTHS')or fnlconstraint < CURRENT_TIMESTAMP 
+				OR (fnlconstraint <= CURRENT_TIMESTAMP AND CURRENT_TIMESTAMP > (DATEADD(DAY,36,targcompdate)) 
+				AND pluscfrequency between 5 AND 11 AND pluscfrequnit IN('MONTHS')OR fnlconstraint < CURRENT_TIMESTAMP 
 				AND CURRENT_TIMESTAMP > (DATEADD(DAY,50,targcompdate)) AND pluscfrequency >= 1 AND pluscfrequnit IN('YEARS')))
-				and status NOT IN('COMP','CORRTD','MISSED','PENRVW','PENDQA','FLAGGED','REVWD') 
+				AND status NOT IN('COMP','CORRTD','MISSED','PENRVW','PENDQA','FLAGGED','REVWD') 
 				AND assignedownergroup IN('FWNCSM','FWNMET','FWNWSM','FWNCS','FWNMNTSCH'))
 			THEN 1 ELSE 0 END) AS 'CritSys Risk Missed'
 	
 	,SUM(CASE WHEN 
-				(status IN('FLAGGED')and assignedownergroup IN('FWNCSM','FWNMET','FWNWSM','FWNCS','FWNMNTSCH'))
+				(status IN('FLAGGED')AND assignedownergroup IN('FWNCSM','FWNMET','FWNWSM','FWNCS','FWNMNTSCH'))
 			THEN 1 ELSE 0 END) AS 'CritSys Flagged'
 	
 	,SUM(CASE WHEN 
-				(status IN('MISSED')and assignedownergroup IN('FWNCSM','FWNMET','FWNWSM','FWNCS','FWNMNTSCH'))
+				(status IN('MISSED')AND assignedownergroup IN('FWNCSM','FWNMET','FWNWSM','FWNCS','FWNMNTSCH'))
 			THEN 1 ELSE 0 END) AS 'CritSys Missed'
 
-FROM workorder
+FROM dbo.workorder
 WHERE 
 	woclass in('WORKORDER','ACTIVITY') AND historyflag = 0 AND istask = 0 AND siteid = 'FWN' 
 	--AND targcompdate >= DATEADD(MONTH, DATEDIFF(MONTH,0,CURRENT_TIMESTAMP)-1,0) --Previous Month
@@ -141,23 +141,23 @@ SELECT
 			THEN 1 ELSE 0 END) AS 'Prod Risk Late'
 			
 	,SUM(CASE WHEN (targcompdate <= DATEADD(MONTH, DATEDIFF(MONTH,0,CURRENT_TIMESTAMP)+1, 0) AND ((CURRENT_TIMESTAMP >= (DATEADD(DAY,-10,targcompdate)) 
-				AND pluscfrequency IN('1','7','14') AND pluscfrequnit IN('DAYS','MONTHS')) or ((fnlconstraint < CURRENT_TIMESTAMP) 
+				AND pluscfrequency IN('1','7','14') AND pluscfrequnit IN('DAYS','MONTHS')) OR ((fnlconstraint < CURRENT_TIMESTAMP) 
 				AND CURRENT_TIMESTAMP > (DATEADD(DAY,8,targcompdate)) AND pluscfrequency between 2 AND 5 AND pluscfrequnit IN('MONTHS')) 
-				or (fnlconstraint <= CURRENT_TIMESTAMP AND CURRENT_TIMESTAMP > (DATEADD(DAY,36,targcompdate)) AND pluscfrequency between 5 AND 11 
-				AND pluscfrequnit IN('MONTHS')or fnlconstraint < CURRENT_TIMESTAMP AND CURRENT_TIMESTAMP > (DATEADD(DAY,50,targcompdate)) 
-				AND pluscfrequency >= 1 AND pluscfrequnit IN('YEARS')))and status NOT IN('COMP','CORRTD','MISSED','PENRVW','PENDQA','FLAGGED','REVWD') 
+				OR (fnlconstraint <= CURRENT_TIMESTAMP AND CURRENT_TIMESTAMP > (DATEADD(DAY,36,targcompdate)) AND pluscfrequency between 5 AND 11 
+				AND pluscfrequnit IN('MONTHS')OR fnlconstraint < CURRENT_TIMESTAMP AND CURRENT_TIMESTAMP > (DATEADD(DAY,50,targcompdate)) 
+				AND pluscfrequency >= 1 AND pluscfrequnit IN('YEARS')))AND status NOT IN('COMP','CORRTD','MISSED','PENRVW','PENDQA','FLAGGED','REVWD') 
 				AND assignedownergroup IN('FWNLCP1','FWNLCP2','FWNLCP3','FWNCSS','FWNLCP4'))
 			THEN 1 ELSE 0 END) AS 'LC Prod Risk Missed'
 			
 	,SUM(CASE WHEN 
-				(status IN('FLAGGED')and assignedownergroup IN('FWNLCP1','FWNLCP2','FWNLCP3','FWNCSS','FWNLCP4'))
+				(status IN('FLAGGED')AND assignedownergroup IN('FWNLCP1','FWNLCP2','FWNLCP3','FWNCSS','FWNLCP4'))
 			THEN 1 ELSE 0 END) AS 'LC Prod Flagged'
 			
 	,SUM(CASE WHEN 
-				(status IN('MISSED')and assignedownergroup IN('FWNLCP1','FWNLCP2','FWNLCP3','FWNCSS','FWNLCP4'))
+				(status IN('MISSED')AND assignedownergroup IN('FWNLCP1','FWNLCP2','FWNLCP3','FWNCSS','FWNLCP4'))
 			THEN 1 ELSE 0 END) AS 'LC Prod Missed'
 
-FROM workorder
+FROM dbo.workorder
 WHERE 
 	woclass in('WORKORDER','ACTIVITY') AND historyflag = 0 AND istask = 0 AND siteid = 'FWN' 
 	--AND targcompdate >= DATEADD(MONTH, DATEDIFF(MONTH,0,CURRENT_TIMESTAMP)-1,0) --Previous Month
@@ -184,24 +184,24 @@ SELECT
 			THEN 1 ELSE 0 END) AS 'ENG Risk Late'
 	
 	,SUM(CASE WHEN (targcompdate <= DATEADD(MONTH, DATEDIFF(MONTH,0,CURRENT_TIMESTAMP)+1, 0) AND ((CURRENT_TIMESTAMP >= (DATEADD(DAY,-10,targcompdate)) 
-				AND pluscfrequency IN('1','7','14') AND pluscfrequnit IN('DAYS','MONTHS')) or ((fnlconstraint < CURRENT_TIMESTAMP) 
+				AND pluscfrequency IN('1','7','14') AND pluscfrequnit IN('DAYS','MONTHS')) OR ((fnlconstraint < CURRENT_TIMESTAMP) 
 				AND CURRENT_TIMESTAMP > (DATEADD(DAY,8,targcompdate)) AND pluscfrequency between 2 AND 5 AND pluscfrequnit IN('MONTHS')) 
-				or (fnlconstraint <= CURRENT_TIMESTAMP AND CURRENT_TIMESTAMP > (DATEADD(DAY,36,targcompdate)) 
-				AND pluscfrequency between 5 AND 11 AND pluscfrequnit IN('MONTHS')or fnlconstraint < CURRENT_TIMESTAMP 
+				OR (fnlconstraint <= CURRENT_TIMESTAMP AND CURRENT_TIMESTAMP > (DATEADD(DAY,36,targcompdate)) 
+				AND pluscfrequency between 5 AND 11 AND pluscfrequnit IN('MONTHS')OR fnlconstraint < CURRENT_TIMESTAMP 
 				AND CURRENT_TIMESTAMP > (DATEADD(DAY,50,targcompdate)) AND pluscfrequency >= 1 AND pluscfrequnit IN('YEARS'))) 
-				and status NOT IN('COMP','CORRTD','MISSED','PENRVW','PENDQA','FLAGGED','REVWD') 
+				AND status NOT IN('COMP','CORRTD','MISSED','PENRVW','PENDQA','FLAGGED','REVWD') 
 				AND assignedownergroup IN('FWNEN2','FWNCAD','FWNPA1','FWNPE','FWNVAL','FWNAE','FWNAE2'))
 			THEN 1 ELSE 0 END) AS 'ENG Risk Missed'
 			
 	,SUM(CASE WHEN 
-				(status IN('FLAGGED')and assignedownergroup IN('FWNEN2','FWNCAD','FWNPA1','FWNPE','FWNVAL','FWNAE','FWNAE2'))
+				(status IN('FLAGGED')AND assignedownergroup IN('FWNEN2','FWNCAD','FWNPA1','FWNPE','FWNVAL','FWNAE','FWNAE2'))
 			THEN 1 ELSE 0 END) AS 'ENG Flagged'
 			
 	,SUM(CASE WHEN 
-				(status IN('MISSED')and assignedownergroup IN('FWNEN2','FWNCAD','FWNPA1','FWNPE','FWNVAL','FWNAE','FWNAE2'))
+				(status IN('MISSED')AND assignedownergroup IN('FWNEN2','FWNCAD','FWNPA1','FWNPE','FWNVAL','FWNAE','FWNAE2'))
 			THEN 1 ELSE 0 END) AS 'ENG Missed'
 
-FROM workorder
+FROM dbo.workorder
 WHERE 
 	woclass in('WORKORDER','ACTIVITY') AND historyflag = 0 AND istask = 0 AND siteid = 'FWN' 
 	--AND targcompdate >= DATEADD(MONTH, DATEDIFF(MONTH,0,CURRENT_TIMESTAMP)-1,0) --Previous Month
@@ -227,23 +227,23 @@ SELECT
 			THEN 1 ELSE 0 END) AS 'PS Prod Risk Late'
 	
 	,SUM(CASE WHEN (targcompdate <= DATEADD(MONTH, DATEDIFF(MONTH,0,CURRENT_TIMESTAMP)+1, 0) AND ((CURRENT_TIMESTAMP >= (DATEADD(DAY,-10,targcompdate)) 
-				AND pluscfrequency IN('1','7','14') AND pluscfrequnit IN('DAYS','MONTHS')) or ((fnlconstraint < CURRENT_TIMESTAMP) 
-				AND CURRENT_TIMESTAMP > (DATEADD(DAY,8,targcompdate)) AND pluscfrequency between 2 AND 5 AND pluscfrequnit IN('MONTHS')) or (fnlconstraint <= CURRENT_TIMESTAMP 
-				AND CURRENT_TIMESTAMP > (DATEADD(DAY,36,targcompdate)) AND pluscfrequency between 5 AND 11 AND pluscfrequnit IN('MONTHS')or fnlconstraint < CURRENT_TIMESTAMP 
+				AND pluscfrequency IN('1','7','14') AND pluscfrequnit IN('DAYS','MONTHS')) OR ((fnlconstraint < CURRENT_TIMESTAMP) 
+				AND CURRENT_TIMESTAMP > (DATEADD(DAY,8,targcompdate)) AND pluscfrequency between 2 AND 5 AND pluscfrequnit IN('MONTHS')) OR (fnlconstraint <= CURRENT_TIMESTAMP 
+				AND CURRENT_TIMESTAMP > (DATEADD(DAY,36,targcompdate)) AND pluscfrequency between 5 AND 11 AND pluscfrequnit IN('MONTHS')OR fnlconstraint < CURRENT_TIMESTAMP 
 				AND CURRENT_TIMESTAMP > (DATEADD(DAY,50,targcompdate)) AND pluscfrequency >= 1 AND pluscfrequnit IN('YEARS')))
-				and status NOT IN('COMP','CORRTD','MISSED','PENRVW','PENDQA','FLAGGED','REVWD') 
+				AND status NOT IN('COMP','CORRTD','MISSED','PENRVW','PENDQA','FLAGGED','REVWD') 
 				AND assignedownergroup IN('FWNPSC','FWNPSP','FWNPSP1','FWNPSP2','FWNPSP3','FWNPSP4','FWNPSP5','FWNPSP6','FWNPSP7'))
 			THEN 1 ELSE 0 END) AS 'PS Prod Risk Missed'
 	
 	,SUM(CASE WHEN 
-				(status IN('FLAGGED')and assignedownergroup IN('FWNPSC','FWNPSP','FWNPSP1','FWNPSP2','FWNPSP3','FWNPSP4','FWNPSP5','FWNPSP6','FWNPSP7'))		
+				(status IN('FLAGGED')AND assignedownergroup IN('FWNPSC','FWNPSP','FWNPSP1','FWNPSP2','FWNPSP3','FWNPSP4','FWNPSP5','FWNPSP6','FWNPSP7'))		
 			THEN 1 ELSE 0 END) AS 'PS Prod Flagged'
 	
 	,SUM(CASE WHEN 
-				(status IN('MISSED')and assignedownergroup IN('FWNPSC','FWNPSP','FWNPSP1','FWNPSP2','FWNPSP3','FWNPSP4','FWNPSP5','FWNPSP6','FWNPSP7'))
+				(status IN('MISSED')AND assignedownergroup IN('FWNPSC','FWNPSP','FWNPSP1','FWNPSP2','FWNPSP3','FWNPSP4','FWNPSP5','FWNPSP6','FWNPSP7'))
 			THEN 1 ELSE 0 END) AS 'PS Prod Missed'
 
-FROM workorder
+FROM dbo.workorder
 WHERE 
 	woclass in('WORKORDER','ACTIVITY') AND historyflag = 0 AND istask = 0 AND siteid = 'FWN' 
 	--AND targcompdate >= DATEADD(MONTH, DATEDIFF(MONTH,0,CURRENT_TIMESTAMP)-1,0) --Previous Month
@@ -269,23 +269,23 @@ SELECT
 			THEN 1 ELSE 0 END) AS 'QA/QC Risk Late'
 	
 	,SUM(CASE WHEN (targcompdate <= DATEADD(MONTH, DATEDIFF(MONTH,0,CURRENT_TIMESTAMP)+1, 0) AND ((CURRENT_TIMESTAMP >= (DATEADD(DAY,-10,targcompdate)) 
-				AND pluscfrequency IN('1','7', '14') AND pluscfrequnit IN('DAYS','MONTHS')) or ((fnlconstraint < CURRENT_TIMESTAMP) 
-				AND CURRENT_TIMESTAMP > (DATEADD(DAY,8,targcompdate)) AND pluscfrequency between 2 AND 5 AND pluscfrequnit IN('MONTHS')) or (fnlconstraint <= CURRENT_TIMESTAMP 
-				AND CURRENT_TIMESTAMP > (DATEADD(DAY,36,targcompdate)) 	AND pluscfrequency between 5 AND 11 AND pluscfrequnit IN('MONTHS')or fnlconstraint < CURRENT_TIMESTAMP 
+				AND pluscfrequency IN('1','7', '14') AND pluscfrequnit IN('DAYS','MONTHS')) OR ((fnlconstraint < CURRENT_TIMESTAMP) 
+				AND CURRENT_TIMESTAMP > (DATEADD(DAY,8,targcompdate)) AND pluscfrequency between 2 AND 5 AND pluscfrequnit IN('MONTHS')) OR (fnlconstraint <= CURRENT_TIMESTAMP 
+				AND CURRENT_TIMESTAMP > (DATEADD(DAY,36,targcompdate)) 	AND pluscfrequency between 5 AND 11 AND pluscfrequnit IN('MONTHS')OR fnlconstraint < CURRENT_TIMESTAMP 
 				AND CURRENT_TIMESTAMP > (DATEADD(DAY,50,targcompdate)) AND pluscfrequency >= 1 AND pluscfrequnit IN('YEARS'))) 
-				and status NOT IN('COMP','CORRTD','MISSED','PENRVW','PENDQA','FLAGGED','REVWD') 
+				AND status NOT IN('COMP','CORRTD','MISSED','PENRVW','PENDQA','FLAGGED','REVWD') 
 				AND assignedownergroup IN('FWNAST','FWNAST1','FWNCCM','FWNQACA','FWNQACL','FWNQACP','FWNQALO','FWNQAMI','FWNQAOP','FWNQAW','FWNQOI'))
 			THEN 1 ELSE 0 END) AS 'QA/QC Risk Missed'
 	
 	,SUM(CASE WHEN 
-				(status IN('FLAGGED')and assignedownergroup IN('FWNAST','FWNAST1','FWNCCM','FWNQACA','FWNQACL','FWNQACP','FWNQALO','FWNQAMI','FWNQAOP','FWNQAW','FWNQOI'))
+				(status IN('FLAGGED')AND assignedownergroup IN('FWNAST','FWNAST1','FWNCCM','FWNQACA','FWNQACL','FWNQACP','FWNQALO','FWNQAMI','FWNQAOP','FWNQAW','FWNQOI'))
 			THEN 1 ELSE 0 END) AS 'QA/QC Flagged'
 	
 	,SUM(CASE WHEN 
-				(status IN('MISSED')and assignedownergroup IN('FWNAST','FWNAST1','FWNCCM','FWNQACA','FWNQACL','FWNQACP','FWNQALO','FWNQAMI','FWNQAOP','FWNQAW','FWNQOI'))
+				(status IN('MISSED')AND assignedownergroup IN('FWNAST','FWNAST1','FWNCCM','FWNQACA','FWNQACL','FWNQACP','FWNQALO','FWNQAMI','FWNQAOP','FWNQAW','FWNQOI'))
 			THEN 1 ELSE 0 END) AS 'QA/QC Missed'
 
-FROM workorder
+FROM dbo.workorder
 WHERE 
 	woclass in('WORKORDER','ACTIVITY') AND historyflag = 0 AND istask = 0 AND siteid = 'FWN' 
 	--AND targcompdate >= DATEADD(MONTH, DATEDIFF(MONTH,0,CURRENT_TIMESTAMP)-1,0) --Previous Month
@@ -310,22 +310,22 @@ SELECT
 			THEN 1 ELSE 0 END) AS 'Other Risk Late'
 	
 	,SUM(CASE WHEN (targcompdate <= DATEADD(MONTH, DATEDIFF(MONTH,0,CURRENT_TIMESTAMP)+1, 0) AND ((CURRENT_TIMESTAMP >= (DATEADD(DAY,-10,targcompdate)) 
-				AND pluscfrequency IN('1','7', '14') AND pluscfrequnit IN('DAYS','MONTHS')) or ((fnlconstraint < CURRENT_TIMESTAMP) 
-				AND CURRENT_TIMESTAMP > (DATEADD(DAY,8,targcompdate)) AND pluscfrequency between 2 AND 5 AND pluscfrequnit IN('MONTHS')) or (fnlconstraint <= CURRENT_TIMESTAMP 
-				AND CURRENT_TIMESTAMP > (DATEADD(DAY,36,targcompdate)) AND pluscfrequency between 5 AND 11 AND pluscfrequnit IN('MONTHS')or fnlconstraint < CURRENT_TIMESTAMP 
+				AND pluscfrequency IN('1','7', '14') AND pluscfrequnit IN('DAYS','MONTHS')) OR ((fnlconstraint < CURRENT_TIMESTAMP) 
+				AND CURRENT_TIMESTAMP > (DATEADD(DAY,8,targcompdate)) AND pluscfrequency between 2 AND 5 AND pluscfrequnit IN('MONTHS')) OR (fnlconstraint <= CURRENT_TIMESTAMP 
+				AND CURRENT_TIMESTAMP > (DATEADD(DAY,36,targcompdate)) AND pluscfrequency between 5 AND 11 AND pluscfrequnit IN('MONTHS')OR fnlconstraint < CURRENT_TIMESTAMP 
 				AND CURRENT_TIMESTAMP > (DATEADD(DAY,50,targcompdate)) AND pluscfrequency >= 1 AND pluscfrequnit IN('YEARS'))) 
-				And status NOT IN('COMP','CORRTD','MISSED','PENRVW','PENDQA','FLAGGED','REVWD') AND assignedownergroup IN('FWNCI','FWNFMOP','FWNHSE','FWNMC1','FWNITOP'))
+				AND status NOT IN('COMP','CORRTD','MISSED','PENRVW','PENDQA','FLAGGED','REVWD') AND assignedownergroup IN('FWNCI','FWNFMOP','FWNHSE','FWNMC1','FWNITOP'))
 			THEN 1 ELSE 0 END) AS 'Other Risk Missed'
 	
 	,SUM(CASE WHEN 
-				(status IN('FLAGGED')and assignedownergroup IN('FWNCI','FWNFMOP','FWNHSE','FWNMC1','FWNITOP'))
+				(status IN('FLAGGED')AND assignedownergroup IN('FWNCI','FWNFMOP','FWNHSE','FWNMC1','FWNITOP'))
 			THEN 1 ELSE 0 END) AS 'Other Flagged'
 			
 	,SUM(CASE WHEN 
-				(status IN('MISSED')and assignedownergroup IN('FWNCI','FWNFMOP','FWNHSE','FWNMC1','FWNITOP'))
+				(status IN('MISSED')AND assignedownergroup IN('FWNCI','FWNFMOP','FWNHSE','FWNMC1','FWNITOP'))
 			THEN 1 ELSE 0 END) AS 'Other Missed'
 
-FROM workorder
+FROM dbo.workorder
 WHERE 
 	woclass in('WORKORDER','ACTIVITY') AND historyflag = 0 AND istask = 0 AND siteid = 'FWN' 
 	--AND targcompdate >= DATEADD(MONTH, DATEDIFF(MONTH,0,CURRENT_TIMESTAMP)-1,0) --Previous Month

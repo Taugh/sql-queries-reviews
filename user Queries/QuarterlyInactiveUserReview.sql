@@ -2,26 +2,26 @@ USE max76PRD
 GO
 
 /* ============================================================================
-Query Name       : Users with Last Login Over 90 Days
+Query Name       : Users WITH Last Login Over 90 Days
 File Path        : C:\Users\BRANNTR1\OneDrive - Alcon\SQL Server Management Studio\User Queries\QuarterlyInactiveUserReview.sql
-Purpose          : Identifies active users at site FWN who have not logged in for over 90 days or have never logged in.
+Purpose          : Identifies active users at site FWN who have NOT logged in for over 90 days OR have never logged in.
 Row Grain        : One row per user
-Assumptions      : Each user has a unique personid and userid; sysuser = 0 excludes system accounts
+Assumptions      : Each user has a unique personid AND userid; sysuser = 0 excludes system accounts
 Parameters       : None
-Filters          : status = 'ACTIVE', defsite = 'FWN', sysuser = 0, last login > 90 days or NULL
-Security         : Ensure access to logintracking and user tables is restricted
+Filters          : status = 'ACTIVE', defsite = 'FWN', sysuser = 0, last login > 90 days OR NULL
+Security         : Ensure access to logintracking AND user tables is restricted
 Version Control  :  https://github.com/Taugh/sql-queries-reviews\blob/main/user%20Queries/QuarterlyInactiveUserReview.sql
-Change Log       : 2025-09-08, Brannon, Troy – Initial review and refactor
+Change Log       : 2025-09-08, Brannon, Troy – Initial review AND refactor
 ============================================================================ */
 
 SELECT DISTINCT 
     m.personid AS [PersonID],
     p.displayname AS [Name],
     MAX(l.attemptdate) AS [Last Login]
-FROM maxuser AS m
-INNER JOIN person AS p
+FROM dbo.maxuser AS m
+INNER JOIN dbo.person AS p
     ON m.personid = p.personid
-INNER JOIN logintracking AS l
+INNER JOIN dbo.logintracking AS l
     ON m.userid = l.userid
 WHERE 
     m.status = 'ACTIVE'

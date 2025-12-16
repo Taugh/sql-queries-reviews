@@ -4,7 +4,7 @@ GO
 /*
   =============================================
   Query: Negative Reconciled Inventory Items
-  Purpose: Identify items reconciled last month with negative quantity
+  Purpose: Identify items reconciled last month WITH negative quantity
   Author: Troy Brannon
   Date: 2025-09-04
   Version: 1.0
@@ -28,7 +28,7 @@ SELECT DISTINCT
     inv.curbal,
     inv.physcnt,
     inv.binnum
-FROM invtrans AS inv
+FROM dbo.invtrans AS inv
 CROSS JOIN DateRange AS dr
 WHERE inv.siteid = 'FWN'
   AND inv.transtype = 'RECBALADJ'

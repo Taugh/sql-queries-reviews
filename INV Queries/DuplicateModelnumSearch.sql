@@ -1,14 +1,14 @@
 USE max76PRD
 GO
 
--- Purpose: Find duplicate model numbers with different item numbers in FWNCS storeroom
+-- Purpose: Find duplicate model numbers WITH different item numbers in FWNCS storeroom
 -- Notes:
 --   - Filters out obsolete items
---   - Uses self-join to compare items with same modelnum but different itemnum
+--   - Uses self-JOIN to compare items WITH same modelnum but different itemnum
 
 WITH inv AS (
     SELECT itemnum, modelnum, binnum
-    FROM inventory
+    FROM dbo.inventory
     WHERE siteid = 'FWN' 
       AND itemsetid = 'IUS' 
       AND location = 'FWNCS' 
@@ -19,7 +19,7 @@ SELECT DISTINCT
     a.itemnum,
     a.modelnum,
     a.binnum
-FROM inv AS a
+FROM dbo.inventory AS a
 INNER JOIN inv AS b
     ON a.modelnum = b.modelnum AND a.itemnum != b.itemnum
 ORDER BY a.modelnum;

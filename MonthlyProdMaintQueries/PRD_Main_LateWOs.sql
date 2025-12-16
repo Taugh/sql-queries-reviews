@@ -6,16 +6,16 @@ Location / File Path: sql/work_orders/WO_Prod_Maint_LateWorkOrders_LastMonth.sql
 
 Purpose:
   List Production Maintenance work orders (CA/PM/RM) completed last month that finished LATE.
-  "Late" = Completed > the earlier of Target Completion Date (targcompdate) and Finish No Later Than
-  (fnlconstraint), ignoring NULLs. Owner teams scoped by Assigned Owner Group and/or Owner Group.
+  "Late" = Completed > the earlier of Target Completion Date (targcompdate) AND Finish No Later Than
+  (fnlconstraint), ignoring NULLs. Owner teams scoped by Assigned Owner Group AND/OR Owner Group.
 
 Row Grain:
   One row per Work Order.
 
 Assumptions:
-  - Completion is identified by wostatus rows with STATUS='COMP'. Some environments may also populate
+  - Completion is identified by wostatus rows WITH STATUS='COMP'. Some environments may also populate
     WORKORDER.actfinish; we prefer COALESCE(actfinish, completion_status.changedate) for robustness.
-  - Either targcompdate or fnlconstraint may be NULL. Late baseline uses the non-NULL earliest date.
+  - Either targcompdate OR fnlconstraint may be NULL. Late baseline uses the non-NULL earliest date.
 
 Parameters:
   @SiteID           : Target site (default 'FWN')
@@ -33,7 +33,7 @@ Security:
   - Read-only; no sensitive columns.
 
 Version Control:
-  - Store under /sql/work_orders with paired doc under /docs/work_orders.
+  - Store under /sql/work_orders WITH paired doc under /docs/work_orders.
 
 Change Log:
   2025-09-04  TB/M365  Refactor: early-of-two-date lateness logic, CROSS APPLY for completion,
@@ -46,7 +46,7 @@ DECLARE @SiteID sysname = N'FWN';
 DECLARE @StartOfPrevMonth date = DATEADD(DAY, 1, EOMONTH(SYSDATETIME(), -2));
 DECLARE @StartOfThisMonth date = DATEADD(DAY, 1, EOMONTH(SYSDATETIME(), -1));
 
--- Production maintenance owner groups (edit as needed)
+-- Production maintenance owner groups (edit AS needed)
 DECLARE @Groups TABLE (GroupID sysname PRIMARY KEY);
 INSERT INTO @Groups (GroupID)
 VALUES (N'FWNLC1'), (N'FWNPS');
@@ -66,7 +66,7 @@ VALUES (N'FWNLC1'), (N'FWNPS');
         w.fnlconstraint,
         -- Completion date: prefer actfinish; fall back to last 'COMP' changedate in-window
         CompletedDate = COALESCE(w.actfinish, comp.changedate),
-        -- Earliest due date between targcompdate and fnlconstraint (ignores NULLs)
+        -- Earliest due date between targcompdate AND fnlconstraint (ignores NULLs)
         DueBaseline = CASE
             WHEN w.targcompdate IS NULL THEN w.fnlconstraint
             WHEN w.fnlconstraint IS NULL THEN w.targcompdate

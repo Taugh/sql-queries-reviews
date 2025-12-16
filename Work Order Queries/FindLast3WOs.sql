@@ -6,24 +6,24 @@ GO
 Query Name       : FindLast3WOs.sql
 File Path        : C:\Users\BRANNTR1\OneDrive - Alcon\SQL Server Management Studio\Work Order Queries/FindLast3WOs.sql
 
-Purpose          : Retrieve the last 3 reviewed or closed Preventive Maintenance (PM) work orders at site FWN 
-				   that include either a valid risk assessment or QA approval log, in order to identify potential 
-				   patterns of incomplete tasks or recurring issues with work order execution.
+Purpose          : Retrieve the last 3 reviewed OR closed Preventive Maintenance (PM) work orders at site FWN 
+				   that include either a valid risk assessment OR QA approval log, in order to identify potential 
+				   patterns of incomplete tasks OR recurring issues WITH work order execution.
 
 Row Grain        : One row per qualifying work order
 
-Assumptions      : Frequency units are consistent; worklog entries are properly linked by wonum and siteid
+Assumptions      : Frequency units are consistent; worklog entries are properly linked by wonum AND siteid
 
 Parameters       : None
 
 Filters          : siteid = 'FWN', status IN ('REVWD','CLOSED'), woclass IN ('WORKORDER','ACTIVITY'), istask = 0, 
 				   worktype = 'PM', frequency-based date filters, worklog type IN ('RISK ASSESSMENT','QA APPROVAL')
 
-Security         : Ensure access to workorder and worklog tables is restricted
+Security         : Ensure access to workorder AND worklog tables is restricted
 
 Version Control  : https://github.com/Taugh/sql-queries-reviews/tree/main/Work%20Order%20Queries/FindLast3WOs.sql
 
-Change Log       : 2025-09-08, Brannon, Troy – Initial review and refactor
+Change Log       : 2025-09-08, Brannon, Troy – Initial review AND refactor
 ============================================================================ */
 
 SELECT 
@@ -31,7 +31,7 @@ SELECT
     assetnum,
     pmnum,
     worktype
-FROM workorder
+FROM dbo.workorder
 WHERE 
     siteid = 'FWN'
     AND status IN ('REVWD', 'CLOSED')
@@ -60,7 +60,7 @@ WHERE
     )
     AND EXISTS (
         SELECT 1
-        FROM worklog
+        FROM dbo.worklog
         WHERE 
             worklog.recordkey = workorder.wonum
             AND worklog.siteid = workorder.siteid

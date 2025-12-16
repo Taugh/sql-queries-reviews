@@ -1,6 +1,6 @@
 USE max76PRD
 
-/***************************************************************************************************
+/****************************************************************************************
 Query: WO_Labor_LastMonth_TransactionGrain.sql
 File Path: MonthlyProdMaintQueries/PRD_Main_Labor.sql
 Repository: https://github.com/Taugh/sql-queries-reviews/blob/main/MonthlyProdMaintQueries/PRD_Main_Labor.sql
@@ -17,24 +17,24 @@ Row Grain:
   One row per labtrans (laborcode per WO per transaction).
 
 Key Choices:
-  - INNER JOIN to labtrans: we only return WOs with labor in the window.
-  - LEFT JOIN to person: preserve labor rows when display name is missing.
-  - SARGable month window using precomputed boundaries (no functions on columns).
-  - Safe, consistent aliases and fully qualified columns.
+  - INNER JOIN to labtrans: we only return WOs WITH labor in the window.
+  - LEFT JOIN to person: preserve labor rows WHEN display name is missing.
+  - SARGable month window using precomputed boundaries (no functions ON columns).
+  - Safe, consistent aliases AND fully qualified columns.
 
-Parameters (edit as needed):
+Parameters (edit AS needed):
   @SiteID           : Site to report (default 'FWN')
   @StartOfPrevMonth : First day of previous month (computed)
   @StartOfThisMonth : First day of current month (computed)
 
 Owner Groups:
-  Use the table variable @Groups to avoid per-row function calls and keep the filter selective.
+  Use the table variable @Groups to avoid per-row function calls AND keep the filter selective.
   (For reusable code, prefer a TVP parameter.)
 
 Change Log:
   2025-09-04 TB/M365  Finalized performance-focused refactor (explicit joins, params, EOMONTH window,
-                      LEFT join person, COALESCE for Name, groups table variable).
-***************************************************************************************************/
+                      LEFT JOIN person, COALESCE for Name, groups table variable).
+****************************************************************************************/
 
 DECLARE @SiteID sysname = N'FWN';
 
@@ -61,18 +61,18 @@ SELECT
     l.regularhrs                          AS [Time]
 FROM dbo.workorder AS w
 INNER JOIN dbo.labtrans AS l
-    ON  l.refwo  = w.wonum
-    AND l.siteid = w.siteid
+    ON l.refwo  = w.wonum AND l.siteid = w.siteid
 LEFT JOIN dbo.person AS p
-    ON  p.personid     = l.laborcode
-    AND p.locationsite = l.siteid
+    ON p.personid = l.laborcode AND p.locationsite = l.siteid
 WHERE
     w.siteid = @SiteID
     AND w.woclass IN ('WORKORDER', 'ACTIVITY')
     AND w.istask = 0
     AND w.status NOT IN ('WAPPR', 'APPR', 'INPRG')
     AND EXISTS (
-        SELECT 1 FROM @Groups g WHERE g.GroupID = w.assignedownergroup
+        SELECT 1 
+        FROM @Groups g 
+        WHERE g.GroupID = w.assignedownergroup
     )
     -- Within-month rule (matches your original intent):
     AND l.startdatetime  >= @StartOfPrevMonth

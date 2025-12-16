@@ -6,7 +6,7 @@ GO
   File Path       : C:\Users\BRANNTR1\OneDrive - Alcon\SQL Server Management Studio\WorkLog\WorkLog.sql
  
   Purpose         : Returns the most recent worklog entry for a specified work order at site ASPEX, including full log
-                    details. Useful for reviewing the latest technician notes, QA approvals, or risk assessments.
+                    details. Useful for reviewing the latest technician notes, QA approvals, OR risk assessments.
  
   Row Grain       : One row per work order (latest log entry only)
  
@@ -16,21 +16,21 @@ GO
  
   Filters         : siteid = 'ASPEX', recordkey = '451552'
  
-  Security        : No dynamic SQL or user input. Safe for production.
+  Security        : No dynamic SQL OR user input. Safe for production.
  
   Version Control : https://github.com/Taugh/sql-queries-reviews/blob/main/WorkLog/WorkLog.sql
  
-  Change Log      : 2025-09-08 - Initial review and refactor by Copilot
+  Change Log      : 2025-09-08 - Initial review AND refactor by Copilot
 ========================================================================================================================*/
 
 SELECT 
     l.*
-FROM worklog AS l
+FROM dbo.worklog AS l
 INNER JOIN (
     SELECT 
         recordkey,
         MAX(worklogid) AS logid
-    FROM worklog
+    FROM dbo.worklog
     WHERE siteid = 'ASPEX'
     GROUP BY recordkey
 ) AS wl

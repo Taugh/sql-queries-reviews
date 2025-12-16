@@ -10,7 +10,7 @@ SELECT refwo
 	,quantity
 	,unitcost
 	,linecost
-FROM matusetrans
+FROM sbo.matusetrans
 WHERE siteid = 'FWN' 
-	and actualdate >= dateadd(year,datediff(year,0,getdate())+0,0)
-	and actualdate < dateadd(month,datediff(month,0,getdate())+0,0)
+	AND actualdate >= dateadd(year,datediff(year,0,getdate())+0,0)
+	AND actualdate < dateadd(month,datediff(month,0,getdate())+0,0)

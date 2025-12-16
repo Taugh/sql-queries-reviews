@@ -9,13 +9,13 @@ Author          : Troy Brannon
 Date            : 2025-09-05
 version         : 1.0
 
-Purpose         : Returns all PMs and associated work orders for assets starting with 'RQ',
-                  including protocol numbers, completion dates, and latest report dates.
+Purpose         : Returns all PMs AND associated work orders for assets starting WITH 'RQ',
+                  including protocol numbers, completion dates, AND latest report dates.
 
 Row Grain       : One row per asset-PM combination
 
 Assumptions     : 
-    - Assets of interest start with 'RQ'
+    - Assets of interest start WITH 'RQ'
     - Latest report date is used to identify most recent work order activity
 
 Parameters      : None
@@ -24,19 +24,19 @@ Filters         :
     - assetnum LIKE 'RQ%'
     - siteid = 'FWN'
 
-Security        : No dynamic SQL or user input. Safe for deployment.
+Security        : No dynamic SQL OR user input. Safe for deployment.
 
 Version Control : Staged for GitHub in 'sql-queries-reviews' repository.
 
 Change Log      : 
-    - 2025-09-05: Initial review and header added by Copilot
+    - 2025-09-05: Initial review AND header added by Copilot
 ******************************************************************************************/
 
 WITH latest_reports AS (
     SELECT 
         wonum,
         MAX(reportdate) AS reportdate
-    FROM workorder
+    FROM dbo.workorder
     WHERE siteid = 'FWN'
     GROUP BY wonum
 )
@@ -55,9 +55,9 @@ SELECT
     p.nextdate AS [Earliest Next Due Date],
     p.frequency AS [Frequency in Years]
 FROM dbo.pm AS p
-INNER JOIN asset AS a
+INNER JOIN dbo.asset AS a
     ON p.assetnum = a.assetnum AND p.siteid = a.siteid
-INNER JOIN workorder AS w
+INNER JOIN dbo.workorder AS w
     ON p.pmnum = w.pmnum AND p.siteid = w.siteid
 INNER JOIN latest_reports AS rd
     ON w.wonum = rd.wonum AND w.reportdate = rd.reportdate

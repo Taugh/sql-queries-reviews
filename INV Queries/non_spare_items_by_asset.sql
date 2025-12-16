@@ -1,8 +1,8 @@
 USE max76PRD
 
--- Retrieve items used on specific assets that are not listed as spare parts
--- Filters by site, location, inventory status, and default flag
--- Uses NOT EXISTS for better performance and null safety
+-- Retrieve items used ON specific assets that are NOT listed AS spare parts
+-- Filters by site, location, inventory status, AND default flag
+-- Uses NOT EXISTS for better performance AND null safety
 
 SELECT DISTINCT
     s.assetnum AS Asset,
@@ -41,7 +41,7 @@ INNER JOIN dbo.invvendor AS v
 WHERE s.siteid = 'FWN'
   AND it.itemsetid = 'IUS'
   AND i.location = 'FWNCS'
-  AND s.assetnum IN ('')  -- TODO: Replace with actual asset numbers
+  AND s.assetnum IN ('')  -- TODO: Replace WITH actual asset numbers
   AND i.status = 'ACTIVE'
   AND isdefault = 1
   AND NOT EXISTS (

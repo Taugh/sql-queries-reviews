@@ -9,15 +9,15 @@ Date Created     : 2025-09-05
 Version          : 1.0
 
 Purpose          : Retrieve purchase order details for Allen-Bradley items ordered in the 
-                   current year. Filters by site, location, manufacturer aliases, and description.
+                   current year. Filters by site, location, manufacturer aliases, AND description.
 
-Row Grain        : One row per unique ponum and polinenum.
+Row Grain        : One row per unique ponum AND polinenum.
 
 Assumptions      : 
                    - Only current-year purchase orders are considered.
                    - Manufacturer aliases are stored in a table variable.
                    - Only latest revision of each PO is selected via CTE.
-                   - Store location must match inventory location for join.
+                   - Store location must match inventory location for JOIN.
 
 Parameters       : 
                    - @StartOfYear: Beginning of the current year.
@@ -31,7 +31,7 @@ Filters          :
                    - manufacturer IN (aliases) OR description LIKE '%ALLEN BRADLEY%'
                    - Only latest revisionnum per ponum is retained
 
-Security         : No sensitive data exposed. Ensure access to po, poline, and inventory 
+Security         : No sensitive data exposed. Ensure access to po, poline, AND inventory 
                    tables is properly controlled.
 
 Version Control  : Stored in GitHub repository 'sql-queries-reviews'
@@ -40,7 +40,7 @@ Version Control  : Stored in GitHub repository 'sql-queries-reviews'
                    Last Reviewed: 2025-09-05 by Troy Brannon
 
 Change Log       : 
-                   - 2025-09-05: Refactored for modularity, parameterization, and maintainability.
+                   - 2025-09-05: Refactored for modularity, parameterization, AND maintainability.
 ******************************************************************************************/
 
 -- Declare parameters
@@ -56,7 +56,7 @@ VALUES ('1052'), ('1942'), ('1949'), ('A&B'), ('A-B'), ('ALLEN-BRADLEY'), ('ALLE
 -- CTE to get latest revision per PO
 WITH LatestPO AS (
     SELECT ponum, MAX(revisionnum) AS revisionnum
-    FROM po
+    FROM dbo.po
     GROUP BY ponum
 )
 
@@ -71,19 +71,20 @@ SELECT DISTINCT
     i.glaccount,
     l.manufacturer,
     p.receipts
-FROM po AS p
+FROM dbo.po AS p
 INNER JOIN LatestPO AS lp
     ON p.ponum = lp.ponum AND p.revisionnum = lp.revisionnum
-INNER JOIN poline AS l
+INNER JOIN dbo.poline AS l
     ON p.ponum = l.ponum AND p.revisionnum = l.revisionnum
-INNER JOIN inventory AS i
+INNER JOIN dbo.inventory AS i
     ON l.itemnum = i.itemnum AND l.storeloc = i.location
 WHERE 
     p.siteid = @siteid
     AND l.storeloc = @storeloc
     AND p.orderdate >= @StartOfYear
     AND (
-        l.manufacturer IN (SELECT name FROM @manufacturer)
-        OR l.description LIKE '%ALLEN BRADLEY%'
-    )
+        l.manufacturer IN (SELECT name 
+                           FROM @manufacturer)
+         OR l.description LIKE '%ALLEN BRADLEY%'
+        )
 ORDER BY p.ponum;

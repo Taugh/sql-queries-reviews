@@ -4,7 +4,7 @@ GO
 /*
   =============================================
   Query: Reconciled Inventory Items
-  Purpose: Identify items reconciled last month with positive quantity
+  Purpose: Identify items reconciled last month WITH positive quantity
   Author: Troy Brannon
   Date: 2025-09-04
   Version: 1.0
@@ -28,8 +28,8 @@ SELECT DISTINCT
     inv.curbal,
     inv.physcnt,
     inv.binnum
-FROM invtrans AS inv
-CROSS JOIN DateRange AS dr
+FROM dbo.invtrans AS inv
+CROSS JOIN dbo.DateRange AS dr
 WHERE inv.siteid = 'FWN'
   AND inv.transtype = 'RECBALADJ'
   AND inv.transdate >= dr.StartDate

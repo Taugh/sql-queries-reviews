@@ -1,12 +1,12 @@
 
--- Compare last year's recorded YTD usage with actual issue transactions and costs
--- Filters by site, item status, and issue type within the previous calendar year
+-- Compare last year's recorded YTD usage WITH actual issue transactions AND costs
+-- Filters by site, item status, AND issue type within the previous calendar year
 
 SELECT DISTINCT
     inv.itemnum AS [Item],
     inv.issue1yrago AS [Last YEAR YTD],
 
-    -- Sum of issue quantities from last year
+    -- Sum of issue quantities FROM last year
     (
         SELECT SUM(quantity)
         FROM dbo.matusetrans
@@ -17,7 +17,7 @@ SELECT DISTINCT
           AND actualdate <  DATEADD(YEAR, DATEDIFF(YEAR, 0, GETDATE()) - 1, 0)
     ) AS [Last YEAR Issue Usage],
 
-    -- Sum of issue costs from last year
+    -- Sum of issue costs FROM last year
     (
         SELECT SUM(linecost)
         FROM dbo.matusetrans

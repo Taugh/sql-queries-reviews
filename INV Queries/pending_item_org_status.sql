@@ -1,7 +1,7 @@
 
--- Identify inventory items that are not obsolete
--- and have a pending status in itemorginfo, which excludes them from reorder reports
--- Join is based on org instead of siteid since itemorginfo status is at the org level
+-- Identify inventory items that are NOT obsolete
+-- AND have a pending status in itemorginfo, which excludes them FROM reorder reports
+-- JOIN is based ON org instead of siteid since itemorginfo status is at the org level
 
 SELECT
     i.itemnum AS [Item #],

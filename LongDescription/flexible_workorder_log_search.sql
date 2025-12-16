@@ -1,6 +1,6 @@
 
--- Search work orders based on flexible criteria
--- Returns work order details along with status logs and long descriptions
+-- Search work orders based ON flexible criteria
+-- Returns work order details along WITH status logs AND long descriptions
 
 SELECT
     w.wonum,

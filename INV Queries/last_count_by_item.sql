@@ -9,16 +9,16 @@ Author           : Troy Brannon
 Date Created     : 2025-09-05
 Last Modified    : 2025-09-05
 
-Purpose          : Retrieve last physical count date and item details for selected items.
-                   Filters by site, location, item status, and itemset. Formats count date.
+Purpose          : Retrieve last physical count date AND item details for selected items.
+                   Filters by site, location, item status, AND itemset. Formats count date.
 
 Row Grain        : One row per itemnum per location.
 
 Assumptions      : 
-                   - Only items from itemset 'IUS' are considered.
-                   - Site and location are hardcoded as 'FWN' and 'FWNCS'.
+                   - Only items FROM itemset 'IUS' are considered.
+                   - Site AND location are hardcoded AS 'FWN' AND 'FWNCS'.
                    - Status 'OBSOLETE' items are excluded.
-                   - Last count date is sourced from invbalances.physcntdate.
+                   - Last count date is sourced FROM invbalances.physcntdate.
                    - Item numbers must be manually specified in the IN clause.
 
 Parameters       : 
@@ -29,9 +29,9 @@ Filters          :
                    - siteid = 'FWN'
                    - location = 'FWNCS'
                    - status NOT IN ('OBSOLETE')
-                   - itemnum IN ('') — placeholder to be replaced with actual values.
+                   - itemnum IN ('') — placeholder to be replaced WITH actual VALUES.
 
-Security         : No sensitive data exposed. Ensure access to inventory, item, and 
+Security         : No sensitive data exposed. Ensure access to inventory, item, AND 
                    invbalances tables is properly controlled.
 
 Version Control  : Stored in GitHub repository 'sql-queries-reviews'
@@ -39,7 +39,7 @@ Version Control  : Stored in GitHub repository 'sql-queries-reviews'
                    Last Reviewed: 2025-09-05 by Troy Brannon
 
 Change Log       : 
-                   - 2025-09-05: Initial header added and query reviewed for clarity.
+                   - 2025-09-05: Initial header added AND query reviewed for clarity.
 ******************************************************************************************/
 
 
@@ -59,4 +59,4 @@ WHERE t.itemsetid = 'IUS'
   AND i.siteid = 'FWN'
   AND i.location = 'FWNCS'
   AND i.status NOT IN ('OBSOLETE')
-  AND i.itemnum IN ('')  -- TODO: Replace with actual item numbers
+  AND i.itemnum IN ('')  -- TODO: Replace WITH actual item numbers

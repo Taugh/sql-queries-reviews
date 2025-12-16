@@ -15,7 +15,7 @@ Row Grain       : One row per work order sent to QA
 
 Assumptions     : 
     - Only status transitions to 'PENDQA' are considered.
-    - QA approval is not required for inclusion.
+    - QA approval is NOT required for inclusion.
 
 Parameters      : None
 
@@ -27,12 +27,12 @@ Filters         :
     - status = 'PENDQA'
     - changedate within previous month
 
-Security        : No dynamic SQL or user input. Safe for deployment.
+Security        : No dynamic SQL OR user input. Safe for deployment.
 
 Version Control : Staged for GitHub in 'sql-queries-reviews' repository.
 
 Change Log      : 
-    - 2025-09-05: Initial review and header added by Copilot
+    - 2025-09-05: Initial review AND header added by Copilot
 ******************************************************************************************/
 
 WITH sent_to_qa AS (
@@ -42,7 +42,7 @@ WITH sent_to_qa AS (
         s.status,
         s.changeby,
         s.changedate
-    FROM wostatus AS s
+    FROM dbo.wostatus AS s
     WHERE s.siteid = 'FWN'
         AND s.status = 'PENDQA'
         AND s.changedate >= DATEADD(MONTH, DATEDIFF(MONTH, 0, CURRENT_TIMESTAMP) - 1, 0)
@@ -58,14 +58,14 @@ SELECT DISTINCT
     s.changedate AS [Date Sent to QA],
     --l.createby AS [Approved By 521],
     p.displayname AS [Sent By]
-FROM workorder AS w
+FROM dbo.workorder AS w
 INNER JOIN sent_to_qa AS s
     ON w.wonum = s.wonum AND w.siteid = s.siteid
-INNER JOIN person AS p
+INNER JOIN dbo.person AS p
     ON s.changeby = p.personid
-INNER JOIN worklog AS l
+INNER JOIN dbo.worklog AS l
     ON w.wonum = l.recordkey AND w.siteid = l.siteid
-INNER JOIN person AS p1
+INNER JOIN dbo.person AS p1
     ON l.createby = p1.personid
 WHERE w.siteid = 'FWN'
     AND w.woclass IN ('WORKORDER', 'ACTIVITY')

@@ -7,7 +7,7 @@ USE max76PRD
 
 ;WITH existing_inventory AS (
     SELECT itemnum, modelnum, binnum
-    FROM inventory
+    FROM dbo.inventory
     WHERE siteid = 'FWN' 
       AND itemsetid = 'IUS' 
       AND location = 'FWNCS' 
@@ -17,7 +17,7 @@ new_items AS (
     SELECT 'NEW123' AS modelnum
     UNION ALL SELECT 'NEW456'
     UNION ALL SELECT 'NEW789'
-    -- Add more model numbers as needed
+    -- Add more model numbers AS needed
 )
 
 SELECT DISTINCT 

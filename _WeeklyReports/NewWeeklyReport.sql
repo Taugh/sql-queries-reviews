@@ -3,8 +3,8 @@ USE max76PRD
 
 /*
   =============================================
-  Query: Future Work Orders with Asset & Location Context
-  Purpose: Identify upcoming work orders with responsible party and asset/location details
+  Query: Future Work Orders WITH Asset & Location Context
+  Purpose: Identify upcoming work orders WITH responsible party AND asset/location details
   Author: Troy Brannon
   Date: 2025-09-04
   Version: 1.0
@@ -12,8 +12,8 @@ USE max76PRD
 */
 
 -- Declare date range for future work orders
-DECLARE @StartDate DATETIME = DATEADD(YEAR, DATEDIFF(YEAR, 0, GETDATE()), 0);
-DECLARE @EndDate DATETIME = DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) + 1, 0);
+DECLARE @StartDate DATETIME2 = DATEADD(YEAR, DATEDIFF(YEAR, 0, GETDATE()), 0);
+DECLARE @EndDate DATETIME2 = DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) + 1, 0);
 
 -- Future Work Orders
 SELECT 
@@ -28,14 +28,14 @@ SELECT
     w.targcompdate AS 'Target Complete Date',
     w.assignedownergroup AS 'Owner Group',
     s.displayname AS 'Responsible Party'
-FROM workorder AS w
-INNER JOIN asset AS a
+FROM dbo.workorder AS w
+INNER JOIN dbo.asset AS a
     ON w.siteid = a.siteid AND w.assetnum = a.assetnum
-INNER JOIN persongroupteam AS p
+INNER JOIN dbo.persongroupteam AS p
     ON w.assignedownergroup = p.persongroup
-INNER JOIN person AS s
+INNER JOIN dbo.person AS s
     ON p.respparty = s.personid
-INNER JOIN locations AS l
+INNER JOIN dbo.locations AS l
     ON a.siteid = l.siteid AND a.location = l.location
 WHERE w.siteid = 'FWN'
   AND w.woclass IN ('WORKORDER', 'ACTIVITY')
