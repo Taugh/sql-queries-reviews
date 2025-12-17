@@ -22,7 +22,7 @@ SELECT DISTINCT
     ISNULL(CONVERT(VARCHAR, inv.lastissuedate, 101), '') AS [Last Issued],
     ISNULL(b.curbal, 0) AS [Current Balance],
     ISNULL(r.reservedqty, 0) AS [Reserved Quantity],
-    ISNULL(b.curbal, 0) - ISNULL(r.reservedqty, 0) AS [Available Quantity],
+    COALESCE((b.curbal - r.reservedqty), b.curbal, 0) AS [Available Quantity],
     inv.issueytd AS [YTD Issue],
     inv.issue1yrago AS [Issued Last Year],
     inv.deliverytime AS [Lead Time (in days)],
