@@ -50,8 +50,9 @@ LEFT JOIN dbo.invuseline AS i
 WHERE w.siteid = 'FWN'
   AND w.woclass IN ('WORKORDER','ACTIVITY')
   AND w.istask = 0
-  AND w.worktype NOT IN ('AD','CA','ECO','RM','PM','RQL','SDM')
+  AND w.worktype NOT IN ('AD','CA','DOCRV','ECO','RM','PM','RQL','SDM')
   -- Optional asset filter:
   -- AND w.assetnum IN ('3360','4023','6370','10109','10340','10992','13385','15314','15451','17281')
   AND w.reportdate >= DATEADD(MONTH, DATEDIFF(MONTH, 0, CURRENT_TIMESTAMP) - 6, 0)
-  AND w.reportdate < DATEADD(MONTH, DATEDIFF(MONTH, 0, CURRENT_TIMESTAMP), 0);
+  AND w.reportdate < DATEADD(MONTH, DATEDIFF(MONTH, 0, CURRENT_TIMESTAMP), 0)
+ORDER BY wonum;

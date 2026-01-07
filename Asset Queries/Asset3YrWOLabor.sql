@@ -22,7 +22,7 @@ SELECT
         WHEN reportdate >= DATEADD(YEAR, DATEDIFF(YEAR, 0, CURRENT_TIMESTAMP) - 3, 0) 
          AND reportdate < DATEADD(YEAR, DATEDIFF(YEAR, 0, CURRENT_TIMESTAMP) - 2, 0)
         THEN w.actlabhrs ELSE 0 
-    END) AS [2022 Downtime],
+    END) AS [2022 Charged Labor],
 
     -- 2023
     SUM(CASE 
@@ -35,7 +35,7 @@ SELECT
         WHEN reportdate >= DATEADD(YEAR, DATEDIFF(YEAR, 0, CURRENT_TIMESTAMP) - 2, 0) 
          AND reportdate < DATEADD(YEAR, DATEDIFF(YEAR, 0, CURRENT_TIMESTAMP) - 1, 0)
         THEN w.actlabhrs ELSE 0 
-    END) AS [2023 Downtime],
+    END) AS [2023 Charged Labor],
 
     -- 2024
     SUM(CASE 
@@ -48,7 +48,7 @@ SELECT
         WHEN reportdate >= DATEADD(YEAR, DATEDIFF(YEAR, 0, CURRENT_TIMESTAMP) - 1, 0) 
          AND reportdate < DATEADD(YEAR, DATEDIFF(YEAR, 0, CURRENT_TIMESTAMP), 0)
         THEN w.actlabhrs ELSE 0 
-    END) AS [2024 Downtime]
+    END) AS [2024 Charged Labor]
 
 FROM dbo.workorder AS w
 INNER JOIN dbo.asset AS a

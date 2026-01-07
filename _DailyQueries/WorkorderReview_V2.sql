@@ -142,7 +142,8 @@ UNION ALL
 SELECT wonum, siteid, status, worktype, assignedownergroup, owner,
        targcompdate, fnlconstraint, actfinish,
        'No Log' AS Error
-FROM no_log;
+FROM no_log
+ORDER BY wonum;
 
 
 -- Summary count of all pending review work orders

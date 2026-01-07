@@ -14,5 +14,7 @@ FROM dbo.inventory
 WHERE siteid = 'FWN'
   AND location = 'FWNCS'
   AND status != 'OBSOLETE'
-  AND issueytd > 0
-  AND lastissuedate < DATEADD(YEAR, DATEDIFF(YEAR, 0, GETDATE()), 0);
+  AND issueytd >= 0  -- Run > 0 first, then >= 0
+  AND lastissuedate < DATEADD(YEAR, DATEDIFF(YEAR, 0, GETDATE()) + 0, 0)
+  AND lastissuedate > DATEADD(YEAR, DATEDIFF(YEAR, 0, GETDATE()) - 1, 0)
+ORDER BY itemnum;

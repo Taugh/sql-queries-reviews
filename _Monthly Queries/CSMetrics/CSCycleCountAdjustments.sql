@@ -29,7 +29,7 @@ SELECT DISTINCT
     inv.physcnt,
     inv.binnum
 FROM dbo.invtrans AS inv
-CROSS JOIN dbo.DateRange AS dr
+CROSS JOIN DateRange AS dr
 WHERE inv.siteid = 'FWN'
   AND inv.transtype = 'RECBALADJ'
   AND inv.transdate >= dr.StartDate
