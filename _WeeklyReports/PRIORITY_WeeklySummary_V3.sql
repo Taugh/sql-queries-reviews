@@ -28,7 +28,7 @@ Version Control:
     - Author: BRANNTR1
     - Date: 2026-01-06
 Change Log:
-    - 1.0 2026-01-07: Added reusable query template header and metadata; preserved original logic.
+    - 3.0 2026-01-06: Added reusable query template header and metadata; preserved original logic.
 =======================================================================================*/
 
 /* === Date anchors === */
