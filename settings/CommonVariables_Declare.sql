@@ -1,0 +1,19 @@
+-- Common Variables using DECLARE statements
+-- Include at the top of your queries with:  :r "settings\CommonVariables_Declare.sql"
+
+DECLARE @ActiveSite VARCHAR(5) = 'FWN'
+DECLARE @AlternateSite VARCHAR(5) = 'ASPEX'
+DECLARE @MainStoreroom VARCHAR(10) = 'FWNCS'
+DECLARE @Username VARCHAR(20) = 'BRANNTR1'
+
+-- Date ranges
+DECLARE @CurrentYearStart DATE = DATEADD(YEAR, DATEDIFF(YEAR, 0, CURRENT_TIMESTAMP), 0)
+DECLARE @CurrentYearEnd DATE = DATEADD(YEAR, DATEDIFF(YEAR, 0, CURRENT_TIMESTAMP) + 1, 0)
+DECLARE @LastYearStart DATE = DATEADD(YEAR, DATEDIFF(YEAR, 0, CURRENT_TIMESTAMP) - 1, 0)
+DECLARE @LastYearEnd DATE = DATEADD(YEAR, DATEDIFF(YEAR, 0, CURRENT_TIMESTAMP), 0)
+DECLARE @CurrentMonthStart DATE = DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()), 0)
+DECLARE @CurrentMonthEnd DATE = DATEADD(MONTH, DATEDIFF(MONTH, 0, GETDATE()) + 1, 0)
+
+-- Common filters
+DECLARE @WorkOrderClasses VARCHAR(50) = 'WORKORDER,ACTIVITY'
+DECLARE @MaintenanceTypes VARCHAR(50) = 'CA,PM,RM,RQL'

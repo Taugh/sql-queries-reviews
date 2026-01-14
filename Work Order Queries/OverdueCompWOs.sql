@@ -15,7 +15,7 @@ WHERE siteid = 'FWN'
 	AND woclass IN ('WORKORDER','ACTIVITY')
 	AND historyflag = 0
 	AND istask = 0
-	AND w.status = 'COMP'
-	AND w.changedate < DATEADD(DAY, -30, CURRENT_TIMESTAMP)
+	AND w.status IN ('COMP','CORRTD')
+	AND w.changedate < DATEADD(DAY, -25, CURRENT_TIMESTAMP)
 	AND groupdefault = 1
-ORDER BY assignedownergroup;
+ORDER BY assignedownergroup, wonum;

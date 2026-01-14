@@ -1,9 +1,7 @@
 USE max76PRD
-GO
 
-
-SELECT COUNT(DISTINCT pmnum) AS [PMs Modified or Created]
-FROM dbo.a_pm
+SELECT COUNT(DISTINCT assetnum) AS [Assets Modified or Created]
+FROM dbo.a_asset
 WHERE siteid IN ('ASPEX','FWN')
 	AND eaudittimestamp >= DATEADD(YEAR,DATEDIFF(YEAR,0,GETDATE())- 1, 0)
 	AND eaudittimestamp < DATEADD(YEAR,DATEDIFF(YEAR,0,GETDATE())+ 0, 0) 

@@ -5,9 +5,9 @@
 --   - Includes spare part usage AND GL account ownership
 
 ;WITH LatestVendor AS (
-    SELECT 1
+    SELECT itemnum, siteid, vendor, lastcost, lastdate
     FROM (
-        SELECT 1,
+        SELECT itemnum, siteid, vendor, lastcost, lastdate,
                ROW_NUMBER() OVER (PARTITION BY itemnum, siteid ORDER BY lastdate DESC) AS rn
         FROM dbo.invvendor
     ) AS ranked
