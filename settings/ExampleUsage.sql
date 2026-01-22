@@ -2,8 +2,8 @@
 USE max76PRD
 GO
 
--- Include common variables
-:r "settings\CommonVariables_Declare.sql"
+-- Include common variables (use absolute path)
+:r "C:\Users\BRANNTR1\OneDrive - Alcon\SQL Server Management Studio\settings\CommonVariables_Declare.sql"
 
 -- Now use the variables in your query
 SELECT COUNT(DISTINCT wonum) AS [Work Orders This Year]

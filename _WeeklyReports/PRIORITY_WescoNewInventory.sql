@@ -49,8 +49,8 @@ DECLARE @RecentDate DATETIME2 = DATEADD(DAY, -7, CAST(GETDATE() AS DATE));
 -- Define site AND location filter
 DECLARE @siteLocation TABLE (siteid VARCHAR(8), location VARCHAR(8));
 INSERT INTO @siteLocation(siteid, location) VALUES 
-    --('ASPEX', 'ASPCS')
-    ('FWN', 'FWNCS')
+    ('ASPEX', 'ASPCS')
+    --('FWN', 'FWNCS')
     -- Add more pairs AS needed
     -- ('SITE3', 'LOC3')
 ;
