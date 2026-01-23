@@ -52,7 +52,7 @@ WHERE status NOT IN ('CAN') AND siteid = 'FWN'
             WHERE mrline.siteid = invuseline.tositeid
               AND mrline.mrnum = invuseline.mrnum
               AND mrline.mrlinenum = invuseline.mrlinenum
-              AND mrline.requireddate < invuseline.actualdate
-              AND mrline.requireddate < invuse.statusdate
+              AND CAST(mrline.requireddate AS DATE) < CAST(invuseline.actualdate AS DATE)
+              --AND mrline.requireddate < invuse.statusdate
         )
   );
