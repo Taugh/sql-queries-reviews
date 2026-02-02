@@ -16,7 +16,7 @@ FROM dbo.a_po
 WHERE siteid = 'FWN' 
 	--AND orderdate >= DATEADD(MONTH, -10, getdate()) 
 	--AND eaudittype = 'I'
-	AND ponum = '3004459894'
+	AND ponum = '44352'
 	--AND revisionnum in ('34','35')
 ORDER BY revisionnum, eaudittimestamp
 

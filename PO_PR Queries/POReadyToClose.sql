@@ -9,7 +9,7 @@ Date Created     : 2025-09-05
 Version          : 1.0 
 
 Purpose          : Identify completed purchase orders at selected sites that have NOT had 
-                   a receipt transaction in the last 5 days. Ensures only approved AND 
+                   a receipt transaction in the last 5 days. Ensures only approved AND 44352
                    non-canceled revisions are included.
 
 Row Grain        : One row per unique ponum per siteid.
